@@ -1,0 +1,12 @@
+{
+  "yql": "select from where",
+  "input": {
+    "query(threshold)": 0.88,
+    "query(q_embedding)": [
+      0.0014491145,
+      0.010332104,
+      0.019870816
+    ]
+  },
+  "ranking": "recommendation"
+}
