@@ -35,6 +35,12 @@ public class YqlObjectImpl extends YqlObjectMixin implements YqlObject {
   }
 
   @Override
+  @NotNull
+  public List<YqlQueryProperty> getQueryPropertyList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, YqlQueryProperty.class);
+  }
+
+  @Override
   public @Nullable ItemPresentation getPresentation() {
     return YqlPsiImplUtils.getPresentation(this);
   }

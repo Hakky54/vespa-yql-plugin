@@ -9,7 +9,7 @@ import com.intellij.navigation.ItemPresentation;
 public interface YqlQueryProperty extends PsiElement {
 
   @Nullable
-  YqlQueryStatement getQueryStatement();
+  PsiElement getDoubleQuotedString();
 
   @NotNull String getName();
 

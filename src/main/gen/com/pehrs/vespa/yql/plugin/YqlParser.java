@@ -255,16 +255,25 @@ public class YqlParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // property (','|&'}')
+  // (query_property | property ) (','|&'}')
   static boolean object_element(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "object_element")) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_);
-    r = property(b, l + 1);
+    r = object_element_0(b, l + 1);
     p = r; // pin = 1
     r = r && object_element_1(b, l + 1);
     exit_section_(b, l, m, r, p, YqlParser::not_brace_or_next_value);
     return r || p;
+  }
+
+  // query_property | property
+  private static boolean object_element_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "object_element_0")) return false;
+    boolean r;
+    r = query_property(b, l + 1);
+    if (!r) r = property(b, l + 1);
+    return r;
   }
 
   // ','|&'}'
@@ -330,7 +339,7 @@ public class YqlParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // '"yql"' (':' query_statement)
+  // '"yql"' (':' DOUBLE_QUOTED_STRING)
   public static boolean query_property(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "query_property")) return false;
     boolean r, p;
@@ -342,20 +351,19 @@ public class YqlParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // ':' query_statement
+  // ':' DOUBLE_QUOTED_STRING
   private static boolean query_property_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "query_property_1")) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_);
-    r = consumeToken(b, COLON);
+    r = consumeTokens(b, 1, COLON, DOUBLE_QUOTED_STRING);
     p = r; // pin = 1
-    r = r && query_statement(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
 
   /* ********************************************************** */
-  // DOUBLE_QUOTE (basic_keyword)* DOUBLE_QUOTE
+  // '"' (basic_keyword)* '"'
   public static boolean query_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "query_statement")) return false;
     if (!nextTokenIs(b, DOUBLE_QUOTE)) return false;

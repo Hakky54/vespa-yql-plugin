@@ -26,7 +26,7 @@ public interface YqlElementTypes {
   IElementType BLOCK_COMMENT = new YqlTokenType("BLOCK_COMMENT");
   IElementType COLON = new YqlTokenType(":");
   IElementType COMMA = new YqlTokenType(",");
-  IElementType DOUBLE_QUOTE = new YqlTokenType("DOUBLE_QUOTE");
+  IElementType DOUBLE_QUOTE = new YqlTokenType("\"");
   IElementType DOUBLE_QUOTED_STRING = new YqlTokenType("DOUBLE_QUOTED_STRING");
   IElementType FALSE = new YqlTokenType("false");
   IElementType IDENTIFIER = new YqlTokenType("IDENTIFIER");
@@ -38,6 +38,7 @@ public interface YqlElementTypes {
   IElementType R_BRACKET = new YqlTokenType("]");
   IElementType R_CURLY = new YqlTokenType("}");
   IElementType SINGLE_QUOTED_STRING = new YqlTokenType("SINGLE_QUOTED_STRING");
+  IElementType STRING = new YqlTokenType("STRING");
   IElementType TRUE = new YqlTokenType("true");
 
   class Factory {

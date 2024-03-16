@@ -11,6 +11,9 @@ public interface YqlObject extends YqlContainer {
   @NotNull
   List<YqlProperty> getPropertyList();
 
+  @NotNull
+  List<YqlQueryProperty> getQueryPropertyList();
+
   @Nullable YqlProperty findProperty(@NotNull String name);
 
   @Nullable ItemPresentation getPresentation();

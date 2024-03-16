@@ -29,8 +29,8 @@ public class YqlQueryPropertyImpl extends YqlQueryPropertyMixin implements YqlQu
 
   @Override
   @Nullable
-  public YqlQueryStatement getQueryStatement() {
-    return findChildByClass(YqlQueryStatement.class);
+  public PsiElement getDoubleQuotedString() {
+    return findChildByType(DOUBLE_QUOTED_STRING);
   }
 
   @Override

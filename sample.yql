@@ -1,5 +1,5 @@
 {
-  "yql": "select from where",
+  "yql": "select * from news where limit true",
   "input": {
     "query(threshold)": 0.88,
     "query(q_embedding)": [
