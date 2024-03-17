@@ -10,14 +10,14 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static com.pehrs.vespa.yql.plugin.YqlElementTypes.*;
 import com.pehrs.vespa.yql.plugin.psi.*;
 
-public class YqlArrayImpl extends YqlElementImpl implements YqlArray {
+public class YqlPropertyValueImpl extends YqlElementImpl implements YqlPropertyValue {
 
-  public YqlArrayImpl(@NotNull ASTNode node) {
+  public YqlPropertyValueImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull YqlVisitor visitor) {
-    visitor.visitArray(this);
+    visitor.visitPropertyValue(this);
   }
 
   @Override
@@ -27,9 +27,21 @@ public class YqlArrayImpl extends YqlElementImpl implements YqlArray {
   }
 
   @Override
-  @NotNull
-  public List<YqlPropertyValue> getPropertyValueList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, YqlPropertyValue.class);
+  @Nullable
+  public YqlArray getArray() {
+    return findChildByClass(YqlArray.class);
+  }
+
+  @Override
+  @Nullable
+  public YqlObject getObject() {
+    return findChildByClass(YqlObject.class);
+  }
+
+  @Override
+  @Nullable
+  public YqlStringLiteral getStringLiteral() {
+    return findChildByClass(YqlStringLiteral.class);
   }
 
 }

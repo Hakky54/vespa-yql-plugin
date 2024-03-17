@@ -10,20 +10,19 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static com.pehrs.vespa.yql.plugin.YqlElementTypes.*;
 import com.pehrs.vespa.yql.plugin.psi.*;
 
-public class YqlNullLiteralImpl extends YqlLiteralImpl implements YqlNullLiteral {
+public class YqlStringValueImpl extends YqlElementImpl implements YqlStringValue {
 
-  public YqlNullLiteralImpl(@NotNull ASTNode node) {
+  public YqlStringValueImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
-  public void accept(@NotNull YqlElementVisitor visitor) {
-    visitor.visitNullLiteral(this);
+  public void accept(@NotNull YqlVisitor visitor) {
+    visitor.visitStringValue(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof YqlElementVisitor) accept((YqlElementVisitor)visitor);
+    if (visitor instanceof YqlVisitor) accept((YqlVisitor)visitor);
     else super.accept(visitor);
   }
 

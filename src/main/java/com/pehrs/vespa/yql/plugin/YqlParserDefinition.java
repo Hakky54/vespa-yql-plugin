@@ -26,7 +26,9 @@ public class YqlParserDefinition implements ParserDefinition {
   @NotNull
   @Override
   public TokenSet getCommentTokens() {
-    return YqlTokenSets.YQL_COMMENTARIES;
+    // return YqlTokenSets.YQL_COMMENTARIES;
+    // FIXME:
+    return TokenSet.EMPTY;
   }
 
   @NotNull

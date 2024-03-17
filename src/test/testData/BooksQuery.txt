@@ -1,0 +1,120 @@
+YQL
+  YqlObject
+    PsiElement({)('{')
+    PsiWhiteSpace('\n  ')
+    YqlProperty
+      YqlPropertyKey
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('yql')
+          PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(:)(':')
+      PsiWhiteSpace(' ')
+      YqlPropertyValue
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('select')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('documentid,')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('embedding,')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('title,')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('content,')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('segment_index')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('from')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('books')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('where')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('{targetHits:5}nearestNeighbor(embedding,q_embedding)')
+          PsiElement(DOUBLE_QUOTE)('"')
+    PsiElement(,)(',')
+    PsiWhiteSpace('\n  ')
+    YqlProperty
+      YqlPropertyKey
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('input')
+          PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(:)(':')
+      PsiWhiteSpace(' ')
+      YqlPropertyValue
+        YqlObject
+          PsiElement({)('{')
+          PsiWhiteSpace('\n    ')
+          YqlProperty
+            YqlPropertyKey
+              YqlStringLiteral
+                PsiElement(DOUBLE_QUOTE)('"')
+                YqlStringValue
+                  PsiElement(STRING)('query(threshold)')
+                PsiElement(DOUBLE_QUOTE)('"')
+            PsiElement(:)(':')
+            PsiWhiteSpace(' ')
+            YqlPropertyValue
+              PsiElement(NUMBER)('0.88')
+          PsiElement(,)(',')
+          PsiWhiteSpace('\n    ')
+          YqlProperty
+            YqlPropertyKey
+              YqlStringLiteral
+                PsiElement(DOUBLE_QUOTE)('"')
+                YqlStringValue
+                  PsiElement(STRING)('query(q_embedding)')
+                PsiElement(DOUBLE_QUOTE)('"')
+            PsiElement(:)(':')
+            PsiWhiteSpace(' ')
+            YqlPropertyValue
+              YqlArray
+                PsiElement([)('[')
+                PsiWhiteSpace('\n      ')
+                YqlPropertyValue
+                  PsiElement(NUMBER)('0.010332104')
+                PsiElement(,)(',')
+                PsiWhiteSpace('\n      ')
+                YqlPropertyValue
+                  PsiElement(NUMBER)('0.14517991')
+                PsiElement(,)(',')
+                PsiWhiteSpace('\n      ')
+                YqlPropertyValue
+                  PsiElement(NUMBER)('0.019870816')
+                PsiWhiteSpace('\n    ')
+                PsiElement(])(']')
+          PsiWhiteSpace('\n  ')
+          PsiElement(})('}')
+    PsiElement(,)(',')
+    PsiWhiteSpace('\n  ')
+    YqlProperty
+      YqlPropertyKey
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('ranking')
+          PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(:)(':')
+      PsiWhiteSpace(' ')
+      YqlPropertyValue
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('recommendation')
+          PsiElement(DOUBLE_QUOTE)('"')
+    PsiWhiteSpace('\n')
+    PsiElement(})('}')

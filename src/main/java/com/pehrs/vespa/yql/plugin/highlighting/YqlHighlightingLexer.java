@@ -9,9 +9,9 @@ import com.pehrs.vespa.yql.plugin.YqlElementTypes;
 public class YqlHighlightingLexer extends LayeredLexer {
   public YqlHighlightingLexer(boolean isPermissiveDialect, boolean canEscapeEol, Lexer baseLexer) {
     super(baseLexer);
-    registerSelfStoppingLayer(new YqlStringLiteralLexer('\"', YqlElementTypes.DOUBLE_QUOTED_STRING, canEscapeEol, isPermissiveDialect),
-                              new IElementType[]{YqlElementTypes.DOUBLE_QUOTED_STRING}, IElementType.EMPTY_ARRAY);
-    registerSelfStoppingLayer(new YqlStringLiteralLexer('\'', YqlElementTypes.SINGLE_QUOTED_STRING, canEscapeEol, isPermissiveDialect),
-                                           new IElementType[]{YqlElementTypes.SINGLE_QUOTED_STRING}, IElementType.EMPTY_ARRAY);
+//    registerSelfStoppingLayer(new YqlStringLiteralLexer('\"', YqlElementTypes.DOUBLE_QUOTED_STRING, canEscapeEol, isPermissiveDialect),
+//                              new IElementType[]{YqlElementTypes.DOUBLE_QUOTED_STRING}, IElementType.EMPTY_ARRAY);
+//    registerSelfStoppingLayer(new YqlStringLiteralLexer('\'', YqlElementTypes.SINGLE_QUOTED_STRING, canEscapeEol, isPermissiveDialect),
+//                                           new IElementType[]{YqlElementTypes.SINGLE_QUOTED_STRING}, IElementType.EMPTY_ARRAY);
   }
 }

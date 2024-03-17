@@ -35,34 +35,34 @@ public class YqlElementGenerator {
    *
    * @see #createStringLiteral(String)
    */
-  public @NotNull <T extends YqlValue> T createValue(@NotNull String content) {
-    final PsiFile file = createDummyFile("{\"foo\": " + content + "}");
-    //noinspection unchecked,ConstantConditions
-    return (T)((YqlObject)file.getFirstChild()).getPropertyList().get(0).getValue();
-  }
-
-  public @NotNull YqlObject createObject(@NotNull String content) {
-    final PsiFile file = createDummyFile("{" + content + "}");
-    return (YqlObject) file.getFirstChild();
-  }
-
-  /**
-   * Create YQL string literal from supplied <em>unescaped</em> content.
-   *
-   * @param unescapedContent unescaped content of string literal, e.g. Java literal {@code "new\nline"} (compare with {@link #createValue(String)}).
-   * @return YQL string literal created from given text
-   */
-  public @NotNull YqlStringLiteral createStringLiteral(@NotNull String unescapedContent) {
-    return createValue('"' + StringUtil.escapeStringCharacters(unescapedContent) + '"');
-  }
-
-  public @NotNull YqlProperty createProperty(final @NotNull String name, final @NotNull String value) {
-    final PsiFile file = createDummyFile("{\"" + name + "\": " + value + "}");
-    return ((YqlObject) file.getFirstChild()).getPropertyList().get(0);
-  }
-
-  public @NotNull PsiElement createComma() {
-    final YqlArray array = createValue("[1, 2]");
-    return array.getValueList().get(0).getNextSibling();
-  }
+//  public @NotNull <T extends YqlValue> T createValue(@NotNull String content) {
+//    final PsiFile file = createDummyFile("{\"foo\": " + content + "}");
+//    //noinspection unchecked,ConstantConditions
+//    return (T)((YqlObject)file.getFirstChild()).getPropertyList().get(0).getValue();
+//  }
+//
+//  public @NotNull YqlObject createObject(@NotNull String content) {
+//    final PsiFile file = createDummyFile("{" + content + "}");
+//    return (YqlObject) file.getFirstChild();
+//  }
+//
+//  /**
+//   * Create YQL string literal from supplied <em>unescaped</em> content.
+//   *
+//   * @param unescapedContent unescaped content of string literal, e.g. Java literal {@code "new\nline"} (compare with {@link #createValue(String)}).
+//   * @return YQL string literal created from given text
+//   */
+//  public @NotNull YqlStringLiteral createStringLiteral(@NotNull String unescapedContent) {
+//    return createValue('"' + StringUtil.escapeStringCharacters(unescapedContent) + '"');
+//  }
+//
+//  public @NotNull YqlProperty createProperty(final @NotNull String name, final @NotNull String value) {
+//    final PsiFile file = createDummyFile("{\"" + name + "\": " + value + "}");
+//    return ((YqlObject) file.getFirstChild()).getPropertyList().get(0);
+//  }
+//
+//  public @NotNull PsiElement createComma() {
+//    final YqlArray array = createValue("[1, 2]");
+//    return array.getValueList().get(0).getNextSibling();
+//  }
 }

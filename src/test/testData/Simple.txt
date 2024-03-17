@@ -1,0 +1,159 @@
+YQL
+  YqlObject
+    PsiElement({)('{')
+    PsiWhiteSpace('\n  ')
+    YqlProperty
+      YqlPropertyKey
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('string1')
+          PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(:)(':')
+      PsiWhiteSpace(' ')
+      YqlPropertyValue
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('this')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('is')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('a')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('simple')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('text')
+          PsiWhiteSpace(' ')
+          YqlStringValue
+            PsiElement(STRING)('string')
+          PsiElement(DOUBLE_QUOTE)('"')
+    PsiElement(,)(',')
+    PsiWhiteSpace('\n  ')
+    YqlProperty
+      YqlPropertyKey
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('string2')
+          PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(:)(':')
+      YqlPropertyValue
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('second')
+          PsiElement(DOUBLE_QUOTE)('"')
+    PsiElement(,)(',')
+    PsiWhiteSpace(' ')
+    YqlProperty
+      YqlPropertyKey
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('string3')
+          PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(:)(':')
+      PsiWhiteSpace(' ')
+      YqlPropertyValue
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('third')
+          PsiElement(DOUBLE_QUOTE)('"')
+    PsiElement(,)(',')
+    PsiWhiteSpace('\n  ')
+    YqlProperty
+      YqlPropertyKey
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('int1')
+          PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(:)(':')
+      PsiWhiteSpace(' ')
+      YqlPropertyValue
+        PsiElement(NUMBER)('42')
+    PsiElement(,)(',')
+    PsiWhiteSpace('\n  ')
+    YqlProperty
+      YqlPropertyKey
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('int2')
+          PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(:)(':')
+      PsiWhiteSpace(' ')
+      YqlPropertyValue
+        PsiElement(NUMBER)('43')
+    PsiElement(,)(',')
+    PsiWhiteSpace('\n  ')
+    YqlProperty
+      YqlPropertyKey
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('float1')
+          PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(:)(':')
+      PsiWhiteSpace(' ')
+      YqlPropertyValue
+        PsiElement(NUMBER)('42.42')
+    PsiElement(,)(',')
+    PsiWhiteSpace('\n  ')
+    YqlProperty
+      YqlPropertyKey
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('float2')
+          PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(:)(':')
+      PsiWhiteSpace(' ')
+      YqlPropertyValue
+        PsiElement(NUMBER)('42.43')
+    PsiElement(,)(',')
+    PsiWhiteSpace('\n  ')
+    YqlProperty
+      YqlPropertyKey
+        YqlStringLiteral
+          PsiElement(DOUBLE_QUOTE)('"')
+          YqlStringValue
+            PsiElement(STRING)('array1')
+          PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(:)(':')
+      PsiWhiteSpace(' ')
+      YqlPropertyValue
+        YqlArray
+          PsiElement([)('[')
+          PsiWhiteSpace('\n  ')
+          YqlPropertyValue
+            PsiElement(NUMBER)('1')
+          PsiElement(,)(',')
+          YqlPropertyValue
+            PsiElement(NUMBER)('2')
+          PsiElement(,)(',')
+          YqlPropertyValue
+            PsiElement(NUMBER)('3')
+          PsiElement(,)(',')
+          YqlPropertyValue
+            PsiElement(NUMBER)('4')
+          PsiElement(,)(',')
+          YqlPropertyValue
+            PsiElement(NUMBER)('5')
+          PsiElement(,)(',')
+          YqlPropertyValue
+            PsiElement(NUMBER)('6')
+          PsiElement(,)(',')
+          PsiWhiteSpace('\n  ')
+          YqlPropertyValue
+            PsiElement(NUMBER)('9')
+          PsiWhiteSpace('\n  ')
+          PsiElement(])(']')
+    PsiWhiteSpace('\n')
+    PsiElement(})('}')

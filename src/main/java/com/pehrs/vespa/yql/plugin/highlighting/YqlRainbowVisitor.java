@@ -3,18 +3,9 @@ package com.pehrs.vespa.yql.plugin.highlighting;
 
 import com.intellij.codeInsight.daemon.RainbowVisitor;
 import com.intellij.codeInsight.daemon.impl.HighlightVisitor;
-import com.intellij.json.pointer.JsonPointerPosition;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.jetbrains.jsonSchema.impl.JsonOriginalPsiWalker;
-import com.pehrs.vespa.yql.plugin.psi.YqlArray;
 import com.pehrs.vespa.yql.plugin.psi.YqlFile;
-import com.pehrs.vespa.yql.plugin.psi.YqlLiteral;
-import com.pehrs.vespa.yql.plugin.psi.YqlNumberLiteral;
-import com.pehrs.vespa.yql.plugin.psi.YqlObject;
-import com.pehrs.vespa.yql.plugin.psi.YqlProperty;
-import com.pehrs.vespa.yql.plugin.psi.YqlStringLiteral;
-import com.pehrs.vespa.yql.plugin.psi.YqlValue;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -43,44 +34,44 @@ public final class YqlRainbowVisitor extends RainbowVisitor {
 
   @Override
   public void visit(@NotNull PsiElement element) {
-    if (element instanceof YqlProperty) {
-      PsiFile file = element.getContainingFile();
-      String fileName = file.getName();
-      if (Holder.blacklist.containsKey(fileName)) {
-        JsonPointerPosition position = JsonOriginalPsiWalker.INSTANCE.findPosition(element, false);
-        if (position != null && Holder.blacklist.get(fileName).contains(position.toJsonPointer())) return;
-      }
-      String name = ((YqlProperty)element).getName();
-      addInfo(getInfo(file, ((YqlProperty)element).getNameElement(), name, YqlSyntaxHighlighterFactory.YQL_PROPERTY_KEY));
-      YqlValue value = ((YqlProperty)element).getValue();
-      if (value instanceof YqlObject) {
-        addInfo(getInfo(file, value.getFirstChild(), name, YqlSyntaxHighlighterFactory.YQL_BRACES));
-        addInfo(getInfo(file, value.getLastChild(), name, YqlSyntaxHighlighterFactory.YQL_BRACES));
-      }
-      else if (value instanceof YqlArray) {
-        addInfo(getInfo(file, value.getFirstChild(), name, YqlSyntaxHighlighterFactory.YQL_BRACKETS));
-        addInfo(getInfo(file, value.getLastChild(), name, YqlSyntaxHighlighterFactory.YQL_BRACKETS));
-        for (YqlValue array : ((YqlArray)value).getValueList()) {
-          addSimpleValueInfo(name, file, array);
-        }
-      }
-      else {
-        addSimpleValueInfo(name, file, value);
-      }
-    }
+//    if (element instanceof YqlProperty) {
+//      PsiFile file = element.getContainingFile();
+//      String fileName = file.getName();
+//      if (Holder.blacklist.containsKey(fileName)) {
+//        JsonPointerPosition position = JsonOriginalPsiWalker.INSTANCE.findPosition(element, false);
+//        if (position != null && Holder.blacklist.get(fileName).contains(position.toJsonPointer())) return;
+//      }
+//      String name = ((YqlProperty)element).getName();
+//      addInfo(getInfo(file, ((YqlProperty)element).getNameElement(), name, YqlSyntaxHighlighterFactory.YQL_PROPERTY_KEY));
+//      YqlValue value = ((YqlProperty)element).getValue();
+//      if (value instanceof YqlObject) {
+//        addInfo(getInfo(file, value.getFirstChild(), name, YqlSyntaxHighlighterFactory.YQL_BRACES));
+//        addInfo(getInfo(file, value.getLastChild(), name, YqlSyntaxHighlighterFactory.YQL_BRACES));
+//      }
+//      else if (value instanceof YqlArray) {
+//        addInfo(getInfo(file, value.getFirstChild(), name, YqlSyntaxHighlighterFactory.YQL_BRACKETS));
+//        addInfo(getInfo(file, value.getLastChild(), name, YqlSyntaxHighlighterFactory.YQL_BRACKETS));
+//        for (YqlValue array : ((YqlArray)value).getValueList()) {
+//          addSimpleValueInfo(name, file, array);
+//        }
+//      }
+//      else {
+//        addSimpleValueInfo(name, file, value);
+//      }
+//    }
   }
 
-  private void addSimpleValueInfo(String name, PsiFile file, YqlValue value) {
-    if (value instanceof YqlStringLiteral) {
-      addInfo(getInfo(file, value, name, YqlSyntaxHighlighterFactory.YQL_STRING));
-    }
-    else if (value instanceof YqlNumberLiteral) {
-      addInfo(getInfo(file, value, name, YqlSyntaxHighlighterFactory.YQL_NUMBER));
-    }
-    else if (value instanceof YqlLiteral) {
-      addInfo(getInfo(file, value, name, YqlSyntaxHighlighterFactory.YQL_KEYWORD));
-    }
-  }
+//  private void addSimpleValueInfo(String name, PsiFile file, YqlValue value) {
+//    if (value instanceof YqlStringLiteral) {
+//      addInfo(getInfo(file, value, name, YqlSyntaxHighlighterFactory.YQL_STRING));
+//    }
+//    else if (value instanceof YqlNumberLiteral) {
+//      addInfo(getInfo(file, value, name, YqlSyntaxHighlighterFactory.YQL_NUMBER));
+//    }
+//    else if (value instanceof YqlLiteral) {
+//      addInfo(getInfo(file, value, name, YqlSyntaxHighlighterFactory.YQL_KEYWORD));
+//    }
+//  }
 
   @Override
   public @NotNull HighlightVisitor clone() {

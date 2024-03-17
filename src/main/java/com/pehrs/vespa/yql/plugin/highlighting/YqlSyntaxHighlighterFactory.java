@@ -76,19 +76,19 @@ public class YqlSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
     private final @Nullable VirtualFile myFile;
 
     {
-      fillMap(ourAttributes, YQL_BRACES, YqlElementTypes.L_CURLY, YqlElementTypes.R_CURLY);
-      fillMap(ourAttributes, YQL_BRACKETS, YqlElementTypes.L_BRACKET, YqlElementTypes.R_BRACKET);
-      fillMap(ourAttributes, YQL_COMMA, YqlElementTypes.COMMA);
-      fillMap(ourAttributes, YQL_COLON, YqlElementTypes.COLON);
-      // fillMap(ourAttributes, YQL_STRING, YqlElementTypes.STRING);
-      fillMap(ourAttributes, YQL_STRING, YqlElementTypes.DOUBLE_QUOTED_STRING);
-      fillMap(ourAttributes, YQL_STRING, YqlElementTypes.SINGLE_QUOTED_STRING);
-      fillMap(ourAttributes, YQL_NUMBER, YqlElementTypes.NUMBER);
-      fillMap(ourAttributes, YQL_KEYWORD, YqlElementTypes.TRUE, YqlElementTypes.FALSE, YqlElementTypes.NULL);
-      fillMap(ourAttributes, YQL_LINE_COMMENT, YqlElementTypes.LINE_COMMENT);
-      fillMap(ourAttributes, YQL_BLOCK_COMMENT, YqlElementTypes.BLOCK_COMMENT);
-      // TODO may be it's worth to add more sensible highlighting for identifiers
-      fillMap(ourAttributes, YQL_IDENTIFIER, YqlElementTypes.IDENTIFIER);
+//      fillMap(ourAttributes, YQL_BRACES, YqlElementTypes.L_CURLY, YqlElementTypes.R_CURLY);
+//      fillMap(ourAttributes, YQL_BRACKETS, YqlElementTypes.L_BRACKET, YqlElementTypes.R_BRACKET);
+//      fillMap(ourAttributes, YQL_COMMA, YqlElementTypes.COMMA);
+//      fillMap(ourAttributes, YQL_COLON, YqlElementTypes.COLON);
+//      // fillMap(ourAttributes, YQL_STRING, YqlElementTypes.STRING);
+//      fillMap(ourAttributes, YQL_STRING, YqlElementTypes.DOUBLE_QUOTED_STRING);
+//      fillMap(ourAttributes, YQL_STRING, YqlElementTypes.SINGLE_QUOTED_STRING);
+//      fillMap(ourAttributes, YQL_NUMBER, YqlElementTypes.NUMBER);
+//      fillMap(ourAttributes, YQL_KEYWORD, YqlElementTypes.TRUE, YqlElementTypes.FALSE, YqlElementTypes.NULL);
+//      fillMap(ourAttributes, YQL_LINE_COMMENT, YqlElementTypes.LINE_COMMENT);
+//      fillMap(ourAttributes, YQL_BLOCK_COMMENT, YqlElementTypes.BLOCK_COMMENT);
+//      // TODO may be it's worth to add more sensible highlighting for identifiers
+//      fillMap(ourAttributes, YQL_IDENTIFIER, YqlElementTypes.IDENTIFIER);
       fillMap(ourAttributes, HighlighterColors.BAD_CHARACTER, TokenType.BAD_CHARACTER);
 
       fillMap(ourAttributes, YQL_VALID_ESCAPE, StringEscapesTokenTypes.VALID_STRING_ESCAPE_TOKEN);

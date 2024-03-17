@@ -5,6 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface YqlContainer extends YqlValue {
+public interface YqlPropertyKey extends PsiElement {
+
+  @NotNull
+  YqlStringLiteral getStringLiteral();
 
 }

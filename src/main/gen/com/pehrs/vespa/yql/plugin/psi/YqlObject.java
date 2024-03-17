@@ -4,18 +4,10 @@ package com.pehrs.vespa.yql.plugin.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
-import com.intellij.navigation.ItemPresentation;
 
-public interface YqlObject extends YqlContainer {
+public interface YqlObject extends PsiElement {
 
   @NotNull
   List<YqlProperty> getPropertyList();
-
-  @NotNull
-  List<YqlQueryProperty> getQueryPropertyList();
-
-  @Nullable YqlProperty findProperty(@NotNull String name);
-
-  @Nullable ItemPresentation getPresentation();
 
 }

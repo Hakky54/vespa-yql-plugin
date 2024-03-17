@@ -5,14 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface YqlStringLiteral extends YqlLiteral {
+public interface YqlStringLiteral extends PsiElement {
 
-  //WARNING: getTextFragments(...) is skipped
-  //matching getTextFragments(YqlStringLiteral, ...)
-  //methods are not found in YqlPsiImplUtils
-
-  @NotNull String getValue();
-
-  boolean isPropertyName();
+  @NotNull
+  List<YqlStringValue> getStringValueList();
 
 }

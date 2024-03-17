@@ -19,6 +19,10 @@ sourceSets {
     }
 }
 
+dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+}
+
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {

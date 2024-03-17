@@ -1,0 +1,13 @@
+{
+  "string1": "this is a simple text string",
+  "string2":"second", "string3": "third",
+  "int1": 42,
+  "int2": 43,
+  "float1": 42.42,
+  "float2": 42.43,
+  "array1": [
+  1,2,3,4,5,6,
+  9
+  ]
+}
+

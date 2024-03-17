@@ -13,5 +13,11 @@ public class YqlTokenType extends IElementType {
 
   public static IElementType DOUBLE_QUOTE = new IElementType("DOUBLE_QUOTE", YqlLanguage.INSTANCE);
 
+  public static IElementType VALUE = new IElementType("VALUE", YqlLanguage.INSTANCE);
+
+  public static IElementType SEPARATOR = new IElementType("SEPARATOR", YqlLanguage.INSTANCE);
+  public static IElementType COMMENT = new IElementType("COMMENT", YqlLanguage.INSTANCE);
+
+  public static IElementType KEY = new IElementType("KEY", YqlLanguage.INSTANCE);
 
 }

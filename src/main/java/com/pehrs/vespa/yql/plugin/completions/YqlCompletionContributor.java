@@ -1,21 +1,10 @@
 package com.pehrs.vespa.yql.plugin.completions;
 
 import com.intellij.codeInsight.completion.CompletionContributor;
-import com.intellij.codeInsight.completion.CompletionParameters;
-import com.intellij.codeInsight.completion.CompletionProvider;
-import com.intellij.codeInsight.completion.CompletionResult;
-import com.intellij.codeInsight.completion.CompletionResultSet;
-import com.intellij.codeInsight.completion.CompletionType;
-import com.intellij.codeInsight.completion.CompletionUtil;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.util.NlsSafe;
-import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
-import com.intellij.util.ProcessingContext;
-import com.pehrs.vespa.yql.plugin.YqlElementTypes;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
 
 final public class YqlCompletionContributor extends CompletionContributor {
 
@@ -92,41 +81,41 @@ final public class YqlCompletionContributor extends CompletionContributor {
   }
 
   public YqlCompletionContributor() {
-    extend(CompletionType.BASIC,
-        PlatformPatterns.psiElement(YqlElementTypes.L_CURLY),
-        new CompletionProvider<CompletionParameters>() {
-          public void addCompletions(@NotNull CompletionParameters parameters,
-              @NotNull ProcessingContext context,
-              @NotNull CompletionResultSet resultSet) {
-            resultSet.addAllElements(YQL_LOOKUP_OTHER);
-          }
-        }
-    );
-    extend(CompletionType.BASIC,
-        PlatformPatterns.psiElement(YqlElementTypes.DOUBLE_QUOTED_STRING),
-        new CompletionProvider<CompletionParameters>() {
-          public void addCompletions(@NotNull CompletionParameters parameters,
-              @NotNull ProcessingContext context,
-              @NotNull CompletionResultSet resultSet) {
-
-            // YQL syntax completions
-            if (isInYqlValue(parameters.getPosition())) {
-              @NotNull PsiElement position = parameters.getPosition();
-              @NlsSafe String text = position.getText();
-              // CompletionUtil.DUMMY_IDENTIFIER
-              String realText = text.replace(CompletionUtil.DUMMY_IDENTIFIER, "");
-              int offset = text.indexOf(CompletionUtil.DUMMY_IDENTIFIER);
-              String textBefore = text.substring(0, offset);
-              String prefix = getPrefix(textBefore);
-              System.out.println("TEXT: " + realText);
-              System.out.println("text before: " + textBefore);
-              // resultSet.addElement(LookupElementBuilder.create("select"));
-              resultSet.addAllElements(YQL_LOOKUP_ELEMENTS);
-              // resultSet.addAllElements(getMatchingCompletions(textBefore, prefix));
-            }
-          }
-        }
-    );
+//    extend(CompletionType.BASIC,
+//        PlatformPatterns.psiElement(YqlElementTypes.L_CURLY),
+//        new CompletionProvider<CompletionParameters>() {
+//          public void addCompletions(@NotNull CompletionParameters parameters,
+//              @NotNull ProcessingContext context,
+//              @NotNull CompletionResultSet resultSet) {
+//            resultSet.addAllElements(YQL_LOOKUP_OTHER);
+//          }
+//        }
+//    );
+//    extend(CompletionType.BASIC,
+//        PlatformPatterns.psiElement(YqlElementTypes.DOUBLE_QUOTED_STRING),
+//        new CompletionProvider<CompletionParameters>() {
+//          public void addCompletions(@NotNull CompletionParameters parameters,
+//              @NotNull ProcessingContext context,
+//              @NotNull CompletionResultSet resultSet) {
+//
+//            // YQL syntax completions
+//            if (isInYqlValue(parameters.getPosition())) {
+//              @NotNull PsiElement position = parameters.getPosition();
+//              @NlsSafe String text = position.getText();
+//              // CompletionUtil.DUMMY_IDENTIFIER
+//              String realText = text.replace(CompletionUtil.DUMMY_IDENTIFIER, "");
+//              int offset = text.indexOf(CompletionUtil.DUMMY_IDENTIFIER);
+//              String textBefore = text.substring(0, offset);
+//              String prefix = getPrefix(textBefore);
+//              System.out.println("TEXT: " + realText);
+//              System.out.println("text before: " + textBefore);
+//              // resultSet.addElement(LookupElementBuilder.create("select"));
+//              resultSet.addAllElements(YQL_LOOKUP_ELEMENTS);
+//              // resultSet.addAllElements(getMatchingCompletions(textBefore, prefix));
+//            }
+//          }
+//        }
+//    );
 
   }
 
