@@ -32,4 +32,10 @@ public class YqlObjectImpl extends YqlElementImpl implements YqlObject {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, YqlProperty.class);
   }
 
+  @Override
+  @NotNull
+  public List<YqlQueryProperty> getQueryPropertyList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, YqlQueryProperty.class);
+  }
+
 }

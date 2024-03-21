@@ -39,7 +39,7 @@ private item_ ::= (object)
 object ::= '{' (object_element)* '}'
 
 
-private object_element ::= property (','|&'}') {
+private object_element ::= (query_property | property) (','|&'}') {
   recoverWhile = not_brace_or_next_value
   pin = 1
 }
@@ -58,9 +58,18 @@ string_value ::= IDENTIFIER | NUMBER | STRING
 
 string_literal ::= DOUBLE_QUOTE string_value* DOUBLE_QUOTE
 
-property_value ::= object | array | string_literal | NUMBER
+property_value ::= object | array | string_literal | NUMBER | TRUE | FALSE
 
 property_key ::= string_literal
 
 property ::= property_key ':' property_value
 
+basic_keyword ::= 'select' | 'from' | 'where' | 'order by' | 'limit' | 'offset' | 'timeout' | 'nearestNeighbor' | 'weightedSet' | 'predicate' | 'dotProduct' | 'userQuery' | 'nonEmpty' | 'userInput' | 'geoLocation' | 'sameElement' | 'matches' | 'range' | 'contains' | 'weakAnd' | 'phrase' | 'fuzzy' | 'equiv' | 'onear' | 'wand' | 'true' | 'false' | 'rank' | 'near' | 'and' | 'not' | 'uri' | 'or' {
+  methods=[
+    getValue
+  ]
+}
+
+query_value ::= DOUBLE_QUOTE (basic_keyword | string_value)* DOUBLE_QUOTE
+
+query_property ::= '"yql"' ':' query_value

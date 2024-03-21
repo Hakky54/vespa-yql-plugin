@@ -11,6 +11,10 @@ public class YqlVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitBasicKeyword(@NotNull YqlBasicKeyword o) {
+    visitPsiElement(o);
+  }
+
   public void visitObject(@NotNull YqlObject o) {
     visitPsiElement(o);
   }
@@ -24,6 +28,14 @@ public class YqlVisitor extends PsiElementVisitor {
   }
 
   public void visitPropertyValue(@NotNull YqlPropertyValue o) {
+    visitPsiElement(o);
+  }
+
+  public void visitQueryProperty(@NotNull YqlQueryProperty o) {
+    visitPsiElement(o);
+  }
+
+  public void visitQueryValue(@NotNull YqlQueryValue o) {
     visitPsiElement(o);
   }
 

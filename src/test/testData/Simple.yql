@@ -1,5 +1,5 @@
 {
-  "string1": "this is a simple text string",
+  "yql": "select * from news where true limit 10",
   "string2":"second", "string3": "third",
   "int1": 42,
   "int2": 43,

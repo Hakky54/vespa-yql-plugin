@@ -9,10 +9,13 @@ import com.pehrs.vespa.yql.plugin.psi.impl.*;
 public interface YqlElementTypes {
 
   IElementType ARRAY = new YqlElementType("ARRAY");
+  IElementType BASIC_KEYWORD = new YqlElementType("BASIC_KEYWORD");
   IElementType OBJECT = new YqlElementType("OBJECT");
   IElementType PROPERTY = new YqlElementType("PROPERTY");
   IElementType PROPERTY_KEY = new YqlElementType("PROPERTY_KEY");
   IElementType PROPERTY_VALUE = new YqlElementType("PROPERTY_VALUE");
+  IElementType QUERY_PROPERTY = new YqlElementType("QUERY_PROPERTY");
+  IElementType QUERY_VALUE = new YqlElementType("QUERY_VALUE");
   IElementType STRING_LITERAL = new YqlElementType("STRING_LITERAL");
   IElementType STRING_VALUE = new YqlElementType("STRING_VALUE");
 
@@ -36,6 +39,9 @@ public interface YqlElementTypes {
       if (type == ARRAY) {
         return new YqlArrayImpl(node);
       }
+      else if (type == BASIC_KEYWORD) {
+        return new YqlBasicKeywordImpl(node);
+      }
       else if (type == OBJECT) {
         return new YqlObjectImpl(node);
       }
@@ -47,6 +53,12 @@ public interface YqlElementTypes {
       }
       else if (type == PROPERTY_VALUE) {
         return new YqlPropertyValueImpl(node);
+      }
+      else if (type == QUERY_PROPERTY) {
+        return new YqlQueryPropertyImpl(node);
+      }
+      else if (type == QUERY_VALUE) {
+        return new YqlQueryValueImpl(node);
       }
       else if (type == STRING_LITERAL) {
         return new YqlStringLiteralImpl(node);

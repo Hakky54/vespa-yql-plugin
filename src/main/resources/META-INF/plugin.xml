@@ -21,9 +21,61 @@
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
   <depends>com.intellij.modules.platform</depends>
 
+  <actions>
+    <!-- FIXME: This action is not needed as we use the lang.formatter below -->
+    <!--
+    <action
+      id="YqlJacksonReformatAction"
+      class="com.pehrs.vespa.yql.plugin.actions.YqlJacksonReformatAction"
+      text="Reformat Code"
+      description="Reformat YQL Request"
+    >
+      <add-to-group group-id="ProjectViewPopupMenuModifyGroup" anchor="after" relative-to-action="ReformatCode"/>
+      <add-to-group group-id="CodeFormatGroup" anchor="after" relative-to-action="ReformatCode"/>
+    </action>
+    -->
+    <action
+      id="ExecuteQueryAction"
+      class="com.pehrs.vespa.yql.plugin.actions.ExecuteQueryAction"
+      text="Execute YQL Request"
+      description="Execute YQL Request in current Vespa Cluster"
+    >
+      <keyboard-shortcut
+        keymap="$default"
+        first-keystroke="control ENTER"/>
+      <add-to-group group-id="RunMenu" anchor="first"/>
+      <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+    </action>
+  </actions>
+
   <!-- Extension points defined by the plugin.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
   <extensions defaultExtensionNs="com.intellij">
+    <actionPromoter implementation="com.pehrs.vespa.yql.plugin.actions.YqlActionPromoter"/>
+
+    <applicationService
+      serviceImplementation="com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsState"/>
+    <applicationConfigurable
+      parentId="tools"
+      instance="com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsConfigurable"
+      id="com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsConfigurable"
+      displayName="Vespa YQL"/>
+
+    <notificationGroup
+      id="Vespa YQL"
+      displayType="BALLOON"/>
+
+    <toolWindow id="Vespa"
+      secondary="false"
+      anchor="right"
+      icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
+      factoryClass="com.pehrs.vespa.yql.plugin.dock.YqlLDockFactory" />
+    <toolWindow id="Vespa YQL Results"
+      secondary="false"
+      anchor="bottom"
+      icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
+      factoryClass="com.pehrs.vespa.yql.plugin.dock.YqlResultsFactory"/>
+
     <fileType
       name="YQL"
       implementationClass="com.pehrs.vespa.yql.plugin.YqlFileType"
@@ -33,11 +85,19 @@
     <lang.parserDefinition
       language="YQL"
       implementationClass="com.pehrs.vespa.yql.plugin.YqlParserDefinition"/>
+    <annotator
+      language="YQL"
+      implementationClass="com.pehrs.vespa.yql.plugin.annotator.YqlAnnotator"/>
     <lang.syntaxHighlighterFactory
       language="YQL"
       implementationClass="com.pehrs.vespa.yql.plugin.highlighting.YqlSyntaxHighlighterFactory"/>
+    <highlightVisitor implementation="com.pehrs.vespa.yql.plugin.highlighting.YqlRainbowVisitor"/>
+    <colorSettingsPage implementation="com.pehrs.vespa.yql.plugin.highlighting.YqlColorsPage"/>
     <completion.contributor
       language="YQL"
       implementationClass="com.pehrs.vespa.yql.plugin.completions.YqlCompletionContributor"/>
+
+    <lang.formatter language="YQL" implementationClass="com.pehrs.vespa.yql.plugin.formatter.YqlFormattingBuilderModel"/>
+
   </extensions>
 </idea-plugin>

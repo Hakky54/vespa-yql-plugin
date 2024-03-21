@@ -1,11 +1,12 @@
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "1.9.21"
-    id("org.jetbrains.intellij") version "1.16.1"
+    // id("org.jetbrains.intellij") version "1.16.1"
+    id("org.jetbrains.intellij") version "1.17.2"
 }
 
 group = "org.pehrs"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -19,8 +20,8 @@ sourceSets {
     }
 }
 
-dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 // Configure Gradle IntelliJ Plugin
@@ -39,6 +40,14 @@ tasks {
         targetCompatibility = "17"
     }
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.jvmTarget = "17"
+    }
+
+    compileKotlin {
+        kotlinOptions.jvmTarget = "17"
+    }
+
+    compileTestKotlin {
         kotlinOptions.jvmTarget = "17"
     }
 

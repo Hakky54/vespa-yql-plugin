@@ -2,36 +2,38 @@ YQL
   YqlObject
     PsiElement({)('{')
     PsiWhiteSpace('\n  ')
-    YqlProperty
-      YqlPropertyKey
-        YqlStringLiteral
-          PsiElement(DOUBLE_QUOTE)('"')
-          YqlStringValue
-            PsiElement(STRING)('string1')
-          PsiElement(DOUBLE_QUOTE)('"')
+    YqlQueryProperty
+      PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(STRING)('yql')
+      PsiElement(DOUBLE_QUOTE)('"')
       PsiElement(:)(':')
       PsiWhiteSpace(' ')
-      YqlPropertyValue
-        YqlStringLiteral
-          PsiElement(DOUBLE_QUOTE)('"')
-          YqlStringValue
-            PsiElement(STRING)('this')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('is')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('a')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('simple')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('text')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('string')
-          PsiElement(DOUBLE_QUOTE)('"')
+      YqlQueryValue
+        PsiElement(DOUBLE_QUOTE)('"')
+        YqlBasicKeyword
+          PsiElement(STRING)('select')
+        PsiWhiteSpace(' ')
+        YqlStringValue
+          PsiElement(STRING)('*')
+        PsiWhiteSpace(' ')
+        YqlBasicKeyword
+          PsiElement(STRING)('from')
+        PsiWhiteSpace(' ')
+        YqlStringValue
+          PsiElement(STRING)('news')
+        PsiWhiteSpace(' ')
+        YqlBasicKeyword
+          PsiElement(STRING)('where')
+        PsiWhiteSpace(' ')
+        YqlStringValue
+          PsiElement(STRING)('true')
+        PsiWhiteSpace(' ')
+        YqlBasicKeyword
+          PsiElement(STRING)('limit')
+        PsiWhiteSpace(' ')
+        YqlStringValue
+          PsiElement(STRING)('10')
+        PsiElement(DOUBLE_QUOTE)('"')
     PsiElement(,)(',')
     PsiWhiteSpace('\n  ')
     YqlProperty

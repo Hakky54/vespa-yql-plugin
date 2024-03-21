@@ -96,6 +96,49 @@ public class YqlParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // 'select' | 'from' | 'where' | 'order by' | 'limit' | 'offset' | 'timeout' | 'nearestNeighbor' | 'weightedSet' | 'predicate' | 'dotProduct' | 'userQuery' | 'nonEmpty' | 'userInput' | 'geoLocation' | 'sameElement' | 'matches' | 'range' | 'contains' | 'weakAnd' | 'phrase' | 'fuzzy' | 'equiv' | 'onear' | 'wand' | 'true' | 'false' | 'rank' | 'near' | 'and' | 'not' | 'uri' | 'or'
+  public static boolean basic_keyword(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "basic_keyword")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, BASIC_KEYWORD, "<basic keyword>");
+    r = consumeToken(b, "select");
+    if (!r) r = consumeToken(b, "from");
+    if (!r) r = consumeToken(b, "where");
+    if (!r) r = consumeToken(b, "order by");
+    if (!r) r = consumeToken(b, "limit");
+    if (!r) r = consumeToken(b, "offset");
+    if (!r) r = consumeToken(b, "timeout");
+    if (!r) r = consumeToken(b, "nearestNeighbor");
+    if (!r) r = consumeToken(b, "weightedSet");
+    if (!r) r = consumeToken(b, "predicate");
+    if (!r) r = consumeToken(b, "dotProduct");
+    if (!r) r = consumeToken(b, "userQuery");
+    if (!r) r = consumeToken(b, "nonEmpty");
+    if (!r) r = consumeToken(b, "userInput");
+    if (!r) r = consumeToken(b, "geoLocation");
+    if (!r) r = consumeToken(b, "sameElement");
+    if (!r) r = consumeToken(b, "matches");
+    if (!r) r = consumeToken(b, "range");
+    if (!r) r = consumeToken(b, "contains");
+    if (!r) r = consumeToken(b, "weakAnd");
+    if (!r) r = consumeToken(b, "phrase");
+    if (!r) r = consumeToken(b, "fuzzy");
+    if (!r) r = consumeToken(b, "equiv");
+    if (!r) r = consumeToken(b, "onear");
+    if (!r) r = consumeToken(b, "wand");
+    if (!r) r = consumeToken(b, TRUE);
+    if (!r) r = consumeToken(b, FALSE);
+    if (!r) r = consumeToken(b, "rank");
+    if (!r) r = consumeToken(b, "near");
+    if (!r) r = consumeToken(b, "and");
+    if (!r) r = consumeToken(b, "not");
+    if (!r) r = consumeToken(b, "uri");
+    if (!r) r = consumeToken(b, "or");
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
   // (object)
   static boolean item_(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "item_")) return false;
@@ -143,16 +186,25 @@ public class YqlParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // property (','|&'}')
+  // (query_property | property) (','|&'}')
   static boolean object_element(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "object_element")) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_);
-    r = property(b, l + 1);
+    r = object_element_0(b, l + 1);
     p = r; // pin = 1
     r = r && object_element_1(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
+  }
+
+  // query_property | property
+  private static boolean object_element_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "object_element_0")) return false;
+    boolean r;
+    r = query_property(b, l + 1);
+    if (!r) r = property(b, l + 1);
+    return r;
   }
 
   // ','|&'}'
@@ -203,7 +255,7 @@ public class YqlParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // object | array | string_literal | NUMBER
+  // object | array | string_literal | NUMBER | TRUE | FALSE
   public static boolean property_value(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "property_value")) return false;
     boolean r;
@@ -212,7 +264,56 @@ public class YqlParser implements PsiParser, LightPsiParser {
     if (!r) r = array(b, l + 1);
     if (!r) r = string_literal(b, l + 1);
     if (!r) r = consumeToken(b, NUMBER);
+    if (!r) r = consumeToken(b, TRUE);
+    if (!r) r = consumeToken(b, FALSE);
     exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // '"yql"' ':' query_value
+  public static boolean query_property(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "query_property")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, QUERY_PROPERTY, "<query property>");
+    r = consumeToken(b, "\"yql\"");
+    r = r && consumeToken(b, COLON);
+    r = r && query_value(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // DOUBLE_QUOTE (basic_keyword | string_value)* DOUBLE_QUOTE
+  public static boolean query_value(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "query_value")) return false;
+    if (!nextTokenIs(b, DOUBLE_QUOTE)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, DOUBLE_QUOTE);
+    r = r && query_value_1(b, l + 1);
+    r = r && consumeToken(b, DOUBLE_QUOTE);
+    exit_section_(b, m, QUERY_VALUE, r);
+    return r;
+  }
+
+  // (basic_keyword | string_value)*
+  private static boolean query_value_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "query_value_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!query_value_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "query_value_1", c)) break;
+    }
+    return true;
+  }
+
+  // basic_keyword | string_value
+  private static boolean query_value_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "query_value_1_0")) return false;
+    boolean r;
+    r = basic_keyword(b, l + 1);
+    if (!r) r = string_value(b, l + 1);
     return r;
   }
 

@@ -1,4 +1,3 @@
-// Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 package com.pehrs.vespa.yql.plugin.highlighting;
 
 import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.BLOCK_COMMENT;
@@ -14,7 +13,6 @@ import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.NUMBE
 import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.SEMICOLON;
 import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.STRING;
 import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE;
-
 
 import com.intellij.lang.Language;
 import com.intellij.lexer.Lexer;
@@ -32,7 +30,6 @@ import com.intellij.psi.tree.IElementType;
 import com.pehrs.vespa.yql.plugin.YqlElementTypes;
 import com.pehrs.vespa.yql.plugin.YqlFileType;
 import com.pehrs.vespa.yql.plugin.YqlLanguage;
-import com.pehrs.vespa.yql.plugin.YqlLexer;
 import com.pehrs.vespa.yql.plugin.YqlLexerAdapter;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +52,6 @@ public class YqlSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
 
   // Added by annotators
   public static final TextAttributesKey YQL_PROPERTY_KEY = TextAttributesKey.createTextAttributesKey("YQL.PROPERTY_KEY", INSTANCE_FIELD);
-
   // String escapes
   public static final TextAttributesKey YQL_VALID_ESCAPE =
     TextAttributesKey.createTextAttributesKey("YQL.VALID_ESCAPE", VALID_STRING_ESCAPE);
@@ -76,19 +72,19 @@ public class YqlSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
     private final @Nullable VirtualFile myFile;
 
     {
-//      fillMap(ourAttributes, YQL_BRACES, YqlElementTypes.L_CURLY, YqlElementTypes.R_CURLY);
-//      fillMap(ourAttributes, YQL_BRACKETS, YqlElementTypes.L_BRACKET, YqlElementTypes.R_BRACKET);
-//      fillMap(ourAttributes, YQL_COMMA, YqlElementTypes.COMMA);
-//      fillMap(ourAttributes, YQL_COLON, YqlElementTypes.COLON);
-//      // fillMap(ourAttributes, YQL_STRING, YqlElementTypes.STRING);
+      fillMap(ourAttributes, YQL_BRACES, YqlElementTypes.L_CURLY, YqlElementTypes.R_CURLY);
+      fillMap(ourAttributes, YQL_BRACKETS, YqlElementTypes.L_BRACKET, YqlElementTypes.R_BRACKET);
+      fillMap(ourAttributes, YQL_COMMA, YqlElementTypes.COMMA);
+      fillMap(ourAttributes, YQL_COLON, YqlElementTypes.COLON);
+      // fillMap(ourAttributes, YQL_STRING, YqlElementTypes.STRING);
 //      fillMap(ourAttributes, YQL_STRING, YqlElementTypes.DOUBLE_QUOTED_STRING);
 //      fillMap(ourAttributes, YQL_STRING, YqlElementTypes.SINGLE_QUOTED_STRING);
-//      fillMap(ourAttributes, YQL_NUMBER, YqlElementTypes.NUMBER);
-//      fillMap(ourAttributes, YQL_KEYWORD, YqlElementTypes.TRUE, YqlElementTypes.FALSE, YqlElementTypes.NULL);
+      fillMap(ourAttributes, YQL_NUMBER, YqlElementTypes.NUMBER);
+      fillMap(ourAttributes, YQL_KEYWORD, YqlElementTypes.TRUE, YqlElementTypes.FALSE, YqlElementTypes.NULL,
+          YqlElementTypes.BASIC_KEYWORD);
 //      fillMap(ourAttributes, YQL_LINE_COMMENT, YqlElementTypes.LINE_COMMENT);
 //      fillMap(ourAttributes, YQL_BLOCK_COMMENT, YqlElementTypes.BLOCK_COMMENT);
-//      // TODO may be it's worth to add more sensible highlighting for identifiers
-//      fillMap(ourAttributes, YQL_IDENTIFIER, YqlElementTypes.IDENTIFIER);
+      fillMap(ourAttributes, YQL_IDENTIFIER, YqlElementTypes.IDENTIFIER);
       fillMap(ourAttributes, HighlighterColors.BAD_CHARACTER, TokenType.BAD_CHARACTER);
 
       fillMap(ourAttributes, YQL_VALID_ESCAPE, StringEscapesTokenTypes.VALID_STRING_ESCAPE_TOKEN);
@@ -115,9 +111,24 @@ public class YqlSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
       return isPermissiveDialect;
     }
 
+    private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
+    private static final TextAttributesKey[] BASIC_KEYWORD_KEYS = new TextAttributesKey[]{YQL_KEYWORD};
+    private static final TextAttributesKey[] NUMBER_KEYS = new TextAttributesKey[]{YQL_NUMBER};
+    private static final TextAttributesKey[] STRING_KEYS = new TextAttributesKey[]{YQL_STRING};
     @Override
-    public TextAttributesKey @NotNull [] getTokenHighlights(IElementType type) {
-      return pack(ourAttributes.get(type));
+    public TextAttributesKey @NotNull [] getTokenHighlights(IElementType tokenType) {
+      // return pack(ourAttributes.get(tokenType));
+
+      if (tokenType.equals(YqlElementTypes.NUMBER)) {
+        return NUMBER_KEYS;
+      }
+      if (tokenType.equals(YqlElementTypes.BASIC_KEYWORD)) {
+        return BASIC_KEYWORD_KEYS;
+      }
+      if (tokenType.equals(YqlElementTypes.STRING)) {
+        return STRING_KEYS;
+      }
+      return EMPTY_KEYS;
     }
   }
 

@@ -10,4 +10,7 @@ public interface YqlObject extends PsiElement {
   @NotNull
   List<YqlProperty> getPropertyList();
 
+  @NotNull
+  List<YqlQueryProperty> getQueryPropertyList();
+
 }

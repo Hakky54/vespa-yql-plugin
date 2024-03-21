@@ -1,30 +1,44 @@
-// Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 package com.pehrs.vespa.yql.plugin.highlighting;
 
 import com.intellij.codeInsight.daemon.RainbowVisitor;
 import com.intellij.codeInsight.daemon.impl.HighlightVisitor;
+import com.intellij.codeInsight.daemon.impl.analysis.HighlightInfoHolder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.pehrs.vespa.yql.plugin.psi.YqlFile;
+import com.pehrs.vespa.yql.plugin.psi.YqlQueryProperty;
+import com.pehrs.vespa.yql.plugin.psi.YqlQueryValue;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 
 public final class YqlRainbowVisitor extends RainbowVisitor {
+
   private static final class Holder {
+
     private static final Map<String, Set<String>> blacklist = createBlacklist();
 
     private static Map<String, Set<String>> createBlacklist() {
       Map<String, Set<String>> blacklist = new HashMap<>();
       blacklist.put("package.yql", Set.of("/dependencies",
-                                                      "/devDependencies",
-                                                      "/peerDependencies",
-                                                      "/scripts",
-                                                      "/directories",
-                                                      "/optionalDependencies"));
+          "/devDependencies",
+          "/peerDependencies",
+          "/scripts",
+          "/directories",
+          "/optionalDependencies"));
       return blacklist;
     }
+  }
+
+  public YqlRainbowVisitor() {
+    super();
+  }
+
+  @Override
+  public boolean analyze(@NotNull PsiFile file, boolean updateWholeFile,
+      @NotNull HighlightInfoHolder holder, @NotNull Runnable action) {
+    return super.analyze(file, updateWholeFile, holder, action);
   }
 
   @Override
@@ -34,7 +48,18 @@ public final class YqlRainbowVisitor extends RainbowVisitor {
 
   @Override
   public void visit(@NotNull PsiElement element) {
-//    if (element instanceof YqlProperty) {
+    PsiFile file = element.getContainingFile();
+
+//    if (element instanceof YqlQueryProperty) {
+//      YqlQueryProperty property = (YqlQueryProperty) element;
+//      @NotNull YqlQueryValue queryValue = property.getQueryValue();
+//      queryValue.getBasicKeywordList().stream()
+//          .forEach(yqlBasicKeyword -> {
+//            addInfo(getInfo(file, yqlBasicKeyword.getFirstChild(), "???", YqlSyntaxHighlighterFactory.YQL_KEYWORD));
+//          });
+//    }
+
+//     if (element instanceof YqlProperty) {
 //      PsiFile file = element.getContainingFile();
 //      String fileName = file.getName();
 //      if (Holder.blacklist.containsKey(fileName)) {
@@ -43,7 +68,7 @@ public final class YqlRainbowVisitor extends RainbowVisitor {
 //      }
 //      String name = ((YqlProperty)element).getName();
 //      addInfo(getInfo(file, ((YqlProperty)element).getNameElement(), name, YqlSyntaxHighlighterFactory.YQL_PROPERTY_KEY));
-//      YqlValue value = ((YqlProperty)element).getValue();
+//       YqlValue value = ((YqlProperty)element).getValue();
 //      if (value instanceof YqlObject) {
 //        addInfo(getInfo(file, value.getFirstChild(), name, YqlSyntaxHighlighterFactory.YQL_BRACES));
 //        addInfo(getInfo(file, value.getLastChild(), name, YqlSyntaxHighlighterFactory.YQL_BRACES));
@@ -58,7 +83,7 @@ public final class YqlRainbowVisitor extends RainbowVisitor {
 //      else {
 //        addSimpleValueInfo(name, file, value);
 //      }
-//    }
+// }
   }
 
 //  private void addSimpleValueInfo(String name, PsiFile file, YqlValue value) {
