@@ -8,8 +8,10 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.intellij.util.xmlb.annotations.XCollection;
 import com.intellij.util.xmlb.annotations.XCollection.Style;
+import com.pehrs.vespa.yql.plugin.YQL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,13 +25,20 @@ public class YqlAppSettingsState implements PersistentStateComponent<YqlAppSetti
 
   @Tag("cluster-config")
   @XCollection(style = Style.v2)
-  public List<VespaClusterConfig> clusterConfigs = new ArrayList<>();
+  public List<VespaClusterConfig> clusterConfigs = new ArrayList<>(
+      List.of(
+          new VespaClusterConfig("localhost", "http://localhost:8080/search/", "http://localhost:19071")
+      )
+  );
 
   @Tag("zipkin-endpoint")
   public String zipkinEndpoint = "http://localhost:9411";
 
+  @Tag("browser-script")
+  public String browserScript = YQL.getDefaultBrowserScript();
+
   @Tag("current-connection")
-  public String currentConnection = null;
+  public String currentConnection = "localhost";
 
   public static YqlAppSettingsState getInstance() {
     return ApplicationManager.getApplication().getService(YqlAppSettingsState.class);

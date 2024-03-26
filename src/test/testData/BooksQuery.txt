@@ -2,48 +2,44 @@ YQL
   YqlObject
     PsiElement({)('{')
     PsiWhiteSpace('\n  ')
-    YqlProperty
-      YqlPropertyKey
-        YqlStringLiteral
-          PsiElement(DOUBLE_QUOTE)('"')
-          YqlStringValue
-            PsiElement(STRING)('yql')
-          PsiElement(DOUBLE_QUOTE)('"')
+    YqlQueryProperty
+      PsiElement(DOUBLE_QUOTE)('"')
+      PsiElement(STRING)('yql')
+      PsiElement(DOUBLE_QUOTE)('"')
       PsiElement(:)(':')
       PsiWhiteSpace(' ')
-      YqlPropertyValue
-        YqlStringLiteral
-          PsiElement(DOUBLE_QUOTE)('"')
-          YqlStringValue
-            PsiElement(STRING)('select')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('documentid,')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('embedding,')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('title,')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('content,')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('segment_index')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('from')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('books')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('where')
-          PsiWhiteSpace(' ')
-          YqlStringValue
-            PsiElement(STRING)('{targetHits:5}nearestNeighbor(embedding,q_embedding)')
-          PsiElement(DOUBLE_QUOTE)('"')
+      YqlQueryValue
+        PsiElement(DOUBLE_QUOTE)('"')
+        YqlBasicKeyword
+          PsiElement(STRING)('select')
+        PsiWhiteSpace(' ')
+        YqlStringValue
+          PsiElement(STRING)('documentid,')
+        PsiWhiteSpace(' ')
+        YqlStringValue
+          PsiElement(STRING)('embedding,')
+        PsiWhiteSpace(' ')
+        YqlStringValue
+          PsiElement(STRING)('title,')
+        PsiWhiteSpace(' ')
+        YqlStringValue
+          PsiElement(STRING)('content,')
+        PsiWhiteSpace(' ')
+        YqlStringValue
+          PsiElement(STRING)('segment_index')
+        PsiWhiteSpace(' ')
+        YqlBasicKeyword
+          PsiElement(STRING)('from')
+        PsiWhiteSpace(' ')
+        YqlStringValue
+          PsiElement(STRING)('books')
+        PsiWhiteSpace(' ')
+        YqlBasicKeyword
+          PsiElement(STRING)('where')
+        PsiWhiteSpace(' ')
+        YqlStringValue
+          PsiElement(STRING)('{targetHits:5}nearestNeighbor(embedding,q_embedding)')
+        PsiElement(DOUBLE_QUOTE)('"')
     PsiElement(,)(',')
     PsiWhiteSpace('\n  ')
     YqlProperty

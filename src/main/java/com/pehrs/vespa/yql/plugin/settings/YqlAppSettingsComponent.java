@@ -21,10 +21,16 @@ import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI.Borders;
+import com.pehrs.vespa.yql.plugin.YQL;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.StringReader;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
@@ -42,10 +48,11 @@ import org.jdesktop.swingx.HorizontalLayout;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class YqlAppSettingsComponent {
+public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
 
   private final JPanel myMainPanel;
   private final JBTextField myZipkinEndpointText;
+  private final JBTextField browserScriptText;
 
   private final JBSplitter splitPane;
   private final JBTextField nameField;
@@ -62,7 +69,6 @@ public class YqlAppSettingsComponent {
 
     createTree();
 
-    // JBPanel configPanel = new JBPanel();
     this.nameField = new JBTextField();
     this.nameField.setEditable(editable);
     this.queryEndpointField = new JBTextField();
@@ -78,16 +84,16 @@ public class YqlAppSettingsComponent {
       setButton = new JButton("Set Values");
       setButton.addActionListener(e -> {
         TreePath path = configTree.getLeadSelectionPath();
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-        Object userObj = node.getUserObject();
-        if (userObj instanceof VespaClusterConfig config) {
-//        Optional<VespaClusterConfig> appConfig = YqlAppSettingsState.getInstance()
-//            .getClusterConfig(config.name);
-          config.name = nameField.getText();
-          config.queryEndpoint = queryEndpointField.getText();
-          config.configEndpoint = configEndpointField.getText();
-          // Notify about changes...
-          YqlAppSettingsStateListener.notifyListeners(YqlAppSettingsState.getInstance());
+        if (path != null) {
+          DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+          Object userObj = node.getUserObject();
+          if (userObj instanceof VespaClusterConfig config) {
+            config.name = nameField.getText();
+            config.queryEndpoint = queryEndpointField.getText();
+            config.configEndpoint = configEndpointField.getText();
+            // Notify about changes...
+            YqlAppSettingsStateListener.notifyListeners(YqlAppSettingsState.getInstance());
+          }
         }
       });
       resetBtn = new JButton("Reset");
@@ -116,9 +122,10 @@ public class YqlAppSettingsComponent {
       builder = builder
           .addComponent(btnPanel);
     }
-    JPanel configPanel = builder
-        .getPanel();
+    JPanel configPanel = new JPanel(new BorderLayout());
+    JPanel formPanel = builder.getPanel();
     // configPanel.setBorder(Borders.customLine(Color.GREEN));
+    configPanel.add(formPanel, BorderLayout.NORTH);
 
     ToolbarDecorator decorator =
         ToolbarDecorator.createDecorator(configTree)
@@ -166,8 +173,8 @@ public class YqlAppSettingsComponent {
           if (e == null) {
             return;
           }
-          ShowSettingsUtil.getInstance().showSettingsDialog(project,
-              "com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsConfigurable");
+          ShowSettingsUtil.getInstance().showSettingsDialog(project, "Vespa YQL");
+          // "com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsConfigurable");
         }
       }));
     }
@@ -185,6 +192,9 @@ public class YqlAppSettingsComponent {
     myZipkinEndpointText = new JBTextField();
     myZipkinEndpointText.setEditable(editable);
 
+    browserScriptText = new JBTextField();
+    browserScriptText.setEditable(editable);
+
     refresh();
 
     PluginId pluginId = PluginId.findId("org.pehrs.vespa-yql-plugin");
@@ -193,7 +203,7 @@ public class YqlAppSettingsComponent {
 
     JBLabel verLabel = new JBLabel(
         "<html><span style='font-size:10px'>"
-            + plugin.getName() + " ver: " + plugin.getVersion()
+            + plugin.getName() + " ver: " + plugin.getVersion() + " " + YQL.getBuildTimestamp()
             + "</span></html>"
     );
     verLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -201,11 +211,16 @@ public class YqlAppSettingsComponent {
     myMainPanel = FormBuilder.createFormBuilder()
         .addComponent(verLabel)
         .addLabeledComponent(new JBLabel("Zipkin endpoint: "), myZipkinEndpointText, 1, false)
+        .addLabeledComponent(new JBLabel("Browser script: "), browserScriptText, 1, false)
         // .addComponentFillVertically(new JPanel(), 0)
         .addComponentFillVertically(pane, 0)
         .getPanel();
 
+    myMainPanel.setBorder(Borders.empty(8));
+
+    YqlAppSettingsStateListener.addListener(this);
   }
+
 
   private void createTree() {
     this.configRoot = new DefaultMutableTreeNode();
@@ -323,6 +338,15 @@ public class YqlAppSettingsComponent {
     myZipkinEndpointText.setText(newText);
   }
 
+  public String getBrowserScript() {
+    return browserScriptText.getText();
+  }
+
+  public void setBrowserScript(String newValue) {
+    browserScriptText.setText(newValue);
+  }
+
+
   public void addClusterConfig(VespaClusterConfig config) {
     this.configRoot.add(new DefaultMutableTreeNode(config, false));
   }
@@ -345,6 +369,12 @@ public class YqlAppSettingsComponent {
   public void refresh() {
     YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
     setZipkinEndpoint(settings.zipkinEndpoint);
+    setBrowserScript(settings.browserScript);
     setVespaClusterConfigs(settings.clusterConfigs);
+  }
+
+  @Override
+  public void stateChanged(YqlAppSettingsState instance) {
+    refresh();
   }
 }

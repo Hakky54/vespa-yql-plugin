@@ -7,15 +7,39 @@
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
   <name>Vespa-yql</name>
 
+  <!-- Should work since 2023.1+ -->
+  <!-- 2023.1.6: 231.9414.13 -->
+  <idea-version since-build="231.*"/>
+
+  <!-- The EDQL plugin overrides ctrl-ENTER on ALL Editors!!! -->
+  <incompatible-with>com.github.chengpohi</incompatible-with>
+
   <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-  <vendor email="matti@pehrs.com" url="https://www.pehrs.com">pehrs.com</vendor>
+  <vendor url="https://www.pehrs.com">pehrs.com</vendor>
+
 
   <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
        Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
   <description><![CDATA[
-    This plugin adds support for Vespa YQL requests.
+  <p>
+    This plugin adds support for Vespa AI YQL requests.
+    <ul>
+      <li>Run YQL requests against your vespa clusters and present the result in a table.</li>
+      <li>Simple highlighting of the request and the yql query value.</li>
+      <li>Simple completion support is given for request snippets and the YQL query string.</li>
+      <li>Render a tree view of any trace in the YQL response.</li>
+    </ul>
+    For more information see the <a href="https://github.com/pehrs/vespa-yql-plugin">project site</a>.
+    </p>
   ]]></description>
+
+  <change-notes><![CDATA[
+<h2>New Features</h2>
+<ul>
+  <li>[1.0.0] - First version</li>
+</ul>
+]]></change-notes>
 
   <!-- Product and plugin compatibility requirements.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
@@ -34,18 +58,36 @@
       <add-to-group group-id="CodeFormatGroup" anchor="after" relative-to-action="ReformatCode"/>
     </action>
     -->
-    <action
-      id="ExecuteQueryAction"
-      class="com.pehrs.vespa.yql.plugin.actions.ExecuteQueryAction"
-      text="Execute YQL Request"
-      description="Execute YQL Request in current Vespa Cluster"
-    >
-      <keyboard-shortcut
-        keymap="$default"
-        first-keystroke="control ENTER"/>
-      <add-to-group group-id="RunMenu" anchor="first"/>
-      <add-to-group group-id="EditorPopupMenu" anchor="first"/>
-    </action>
+
+    <group
+      id="com.pehrs.vespa.yql.plugin.actions.YqlGroup"
+      text="YQL"
+      popup="true"
+      icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE">
+      <add-to-group
+        group-id="ToolsMenu"
+        anchor="last"/>
+
+      <action
+        id="ExecuteQueryAction"
+        class="com.pehrs.vespa.yql.plugin.actions.ExecuteQueryAction"
+        text="Execute YQL Request"
+        description="Execute YQL Request in current Vespa Cluster"
+        icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
+      >
+        <keyboard-shortcut
+          keymap="$default"
+          first-keystroke="control ENTER"/>
+        <!--
+        <add-to-group group-id="com.pehrs.vespa.yql.plugin.actions.YqlGroup" anchor="first"/>
+        <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        <add-to-group group-id="RunMenu" anchor="first"/>
+        -->
+      </action>
+    </group>
+
+
+
   </actions>
 
   <!-- Extension points defined by the plugin.
@@ -69,12 +111,12 @@
       secondary="false"
       anchor="right"
       icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
-      factoryClass="com.pehrs.vespa.yql.plugin.dock.YqlLDockFactory" />
+      factoryClass="com.pehrs.vespa.yql.plugin.dock.YqlDockFactory" />
     <toolWindow id="Vespa YQL Results"
       secondary="false"
       anchor="bottom"
       icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
-      factoryClass="com.pehrs.vespa.yql.plugin.dock.YqlResultsFactory"/>
+      factoryClass="com.pehrs.vespa.yql.plugin.results.YqlResultsFactory"/>
 
     <fileType
       name="YQL"

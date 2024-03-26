@@ -26,11 +26,12 @@ public class YqlFile extends PsiFileBase {
           && ((LanguageFileType) type).getLanguage() instanceof YqlLanguage) {
         return true;
       }
-      if (project == null || !ScratchUtil.isScratch(file)) {
-        return false;
-      }
-      RootType rootType = ScratchFileService.findRootType(file);
-      return rootType != null && rootType.substituteLanguage(project, file) instanceof YqlLanguage;
+//      if (project == null || !ScratchUtil.isScratch(file)) {
+//        return false;
+//      }
+//      RootType rootType = ScratchFileService.findRootType(file);
+//      return rootType != null && rootType.substituteLanguage(project, file) instanceof YqlLanguage;
+    return false;
   }
 
   @NotNull

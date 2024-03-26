@@ -27,12 +27,11 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class YqlResult {
 
-  public static String YQL_SAMPLE_RESULT = getResource("/vespa-results-sample.json");
-  public static String YQL_SAMPLE_INIT_RESULT = getResource("/vespa-results-init.json");
+  public static String YQL_SAMPLE_RESULT = YQL.getResource("/vespa-results-sample.json");
+  public static String YQL_SAMPLE_INIT_RESULT = YQL.getResource("/vespa-results-init.json");
   static List<YqlResultListener> listeners = new ArrayList();
   private static ObjectMapper mapper = new ObjectMapper();
   private static YqlResult lastResult = null;
-  private static FileSystem jarFs = null;
 
   public final JsonNode result;
 
@@ -83,31 +82,6 @@ public class YqlResult {
     }
   }
 
-  private static String getResource(String resourceName) {
-    try {
-
-      URL url;
-      url = YQL.class.getResource(resourceName);
-      // Workaround for java.nio.file.FileSystemNotFoundException issue in Intellij plugins
-      final Map<String, String> env = new HashMap<>();
-      final String[] array = url.toURI().toString().split("!");
-      if(array.length > 1) {
-        if(jarFs == null) {
-          jarFs = FileSystems.newFileSystem(URI.create(array[0]), env);
-        }
-        final Path path = jarFs.getPath(array[1]);
-        return Files.readString(path, Charset.forName("utf-8"));
-      } else {
-        return Files.readString(Paths.get(url.toURI()), Charset.forName("utf-8"));
-      }
-
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   public String toString() {
     try {
       return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
@@ -123,20 +97,28 @@ public class YqlResult {
   public record YqlQueryError(Integer code, String summary, String message) {}
 
   public List<YqlQueryError> getErrors() {
-    JsonNode errors = this.result.get("root").get("errors");
-    if(errors == null) {
-      return List.of();
+    // Maybe single error?
+    JsonNode error = this.result.get("error");
+    if(error != null) {
+      return List.of(
+          new YqlQueryError(-1, "vespa error", error.asText())
+      );
     }
-    return StreamSupport.stream(
-        Spliterators.spliteratorUnknownSize(errors.iterator(), Spliterator.ORDERED),
-        false).collect(Collectors.toList())
-        .stream().map(errorNode -> {
-          int code = errorNode.get("code").asInt();
-          String summary = errorNode.get("summary").asText();
-          String message = errorNode.get("message").asText();
-          return new YqlQueryError(code, summary, message);
-        })
-        .collect(Collectors.toList());
+    JsonNode errors = this.result.get("root").get("errors");
+    if(errors != null) {
+      return StreamSupport.stream(
+              Spliterators.spliteratorUnknownSize(errors.iterator(), Spliterator.ORDERED),
+              false).collect(Collectors.toList())
+          .stream().map(errorNode -> {
+            int code = errorNode.get("code").asInt();
+            String summary = errorNode.get("summary").asText();
+            String message = errorNode.get("message").asText();
+            return new YqlQueryError(code, summary, message);
+          })
+          .collect(Collectors.toList());
+    }
+
+    return List.of();
   }
 
   public List<String> getColumnNames() {

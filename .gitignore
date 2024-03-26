@@ -40,3 +40,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### MISC ###
+src/main/resources/build-info.properties
+

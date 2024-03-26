@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services version="1.0">
+
+  <admin version="2.0">
+    <configservers>
+      <configserver hostalias="vespa-config1" />
+      <configserver hostalias="vespa-config2" />
+      <configserver hostalias="vespa-config3" />
+    </configservers>
+    <cluster-controllers>
+      <cluster-controller hostalias="vespa-config1" jvm-options="-Xms32M -Xmx64M" />
+      <cluster-controller hostalias="vespa-config2" jvm-options="-Xms32M -Xmx64M" />
+      <cluster-controller hostalias="vespa-config3" jvm-options="-Xms32M -Xmx64M" />
+    </cluster-controllers>
+    <slobroks>
+      <slobrok hostalias="vespa-config1" />
+      <slobrok hostalias="vespa-config2" />
+      <slobrok hostalias="vespa-config3" />
+    </slobroks>
+    
+    <adminserver hostalias="vespa-config1" />
+  </admin>
+
+  <container id="default" version="1.0">
+    <search />
+    <document-api />
+    <nodes>
+      <jvm options="-Xms32M -Xmx128M"/>
+      <node hostalias="vespa-app1" />
+    </nodes>
+  </container>
+
+  <content id="llm" version="1.0">
+    <redundancy>2</redundancy>
+    <documents>
+      <document type="news" mode="index" />
+      <document type="books" mode="index" />
+    </documents>
+    <nodes>
+      <node hostalias="vespa-content1" distribution-key="0" />
+      <node hostalias="vespa-content2" distribution-key="1" />
+      <node hostalias="vespa-content3" distribution-key="2" />
+    </nodes>
+  </content>
+
+</services>

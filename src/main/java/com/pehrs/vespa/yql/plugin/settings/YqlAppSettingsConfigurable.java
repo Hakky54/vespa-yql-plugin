@@ -50,6 +50,7 @@ public class YqlAppSettingsConfigurable implements Configurable {
   public void apply() {
     YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
     settings.zipkinEndpoint = mySettingsComponent.getZipkinEndpoint();
+    settings.browserScript = mySettingsComponent.getBrowserScript();
     settings.clusterConfigs = mySettingsComponent.getVespaClusterConfigs();
     YqlAppSettingsStateListener.notifyListeners(settings);
   }
@@ -58,6 +59,7 @@ public class YqlAppSettingsConfigurable implements Configurable {
   public void reset() {
     YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
     mySettingsComponent.setZipkinEndpoint(settings.zipkinEndpoint);
+    mySettingsComponent.setBrowserScript(settings.browserScript);
     mySettingsComponent.setVespaClusterConfigs(settings.clusterConfigs);
   }
 

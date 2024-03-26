@@ -17,6 +17,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.pehrs.vespa.yql.plugin.YQL;
+import com.pehrs.vespa.yql.plugin.YqlFileType;
 import com.pehrs.vespa.yql.plugin.YqlResult;
 import com.pehrs.vespa.yql.plugin.YqlResult.YqlQueryError;
 import com.pehrs.vespa.yql.plugin.psi.YqlFile;
@@ -39,8 +40,7 @@ public class ExecuteQueryAction extends AnAction {
     @Nullable VirtualFile virtualFile = actionEvent.getData(
         CommonDataKeys.VIRTUAL_FILE);
     actionEvent.getPresentation().setEnabledAndVisible(
-        ApplicationManager.getApplication().isInternal() &&
-            virtualFile != null &&
+        virtualFile != null &&
             YqlFile.isYqlFile(virtualFile, actionEvent.getProject())
     );
   }

@@ -32,7 +32,7 @@ public class YqlResultTest {
 
     List<YqlResultRow> rows = result.getRows();
 
-    Assert.assertEquals(5, rows.size());
+    Assert.assertEquals(9, rows.size());
     Set<Boolean> embedLengths = rows.stream().map(row -> {
           List<Float> embedding = (List<Float>) row.fields().get("embedding");
           return embedding.size() == 384;
