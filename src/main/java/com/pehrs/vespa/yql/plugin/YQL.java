@@ -2,12 +2,13 @@ package com.pehrs.vespa.yql.plugin;
 
 import static nl.altindag.ssl.util.internal.ValidationUtils.requireNotNull;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
-import com.pehrs.vespa.yql.plugin.settings.VespaClusterConfig;
-import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsState;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import com.pehrs.vespa.yql.plugin.VespaClusterChecker.StatusListener;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -19,45 +20,14 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.X509ExtendedKeyManager;
-import javax.net.ssl.X509ExtendedTrustManager;
-import nl.altindag.ssl.util.TrustManagerUtils;
-import nl.altindag.ssl.util.internal.IOUtils;
-import nl.altindag.ssl.util.internal.ValidationUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.ssl.TrustStrategy;
-import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import nl.altindag.ssl.SSLFactory;
-import nl.altindag.ssl.pem.util.PemUtils;
 
 /**
  * Static facade for global functions and constants
@@ -107,119 +77,6 @@ public class YQL implements StartupActivity {
       "or"
   );
 
-  public static SSLFactory createSslFactory(String caPemFile, String clientCertFile,
-      String clientKeyFile) {
-    log.trace("createSslFactory(" + caPemFile + ", " + clientCertFile + ", " + clientKeyFile + ")");
-    X509ExtendedTrustManager trustManager;
-    trustManager = createTrustManager(caPemFile);
-
-    X509ExtendedKeyManager keyManager;
-    keyManager = createKeyManager(clientCertFile, clientKeyFile);
-
-    SSLFactory sslFactory = SSLFactory.builder()
-        .withTrustMaterial(trustManager)
-        .withIdentityMaterial(keyManager)
-        .build();
-    return sslFactory;
-  }
-
-  private static X509ExtendedKeyManager createKeyManager(String clientCertFile,
-      String clientKeyFile) {
-    X509ExtendedKeyManager keyManager;
-    try (FileInputStream certFile = new FileInputStream(clientCertFile);
-        FileInputStream keyFile = new FileInputStream(clientKeyFile)) {
-      String certificateChainContent = IOUtils.getContent(certFile);
-      String privateKeyContent = IOUtils.getContent(keyFile);
-      keyManager = PemUtils.parseIdentityMaterial(certificateChainContent,
-          privateKeyContent, null);
-    } catch (IOException e) {
-      log.error(e.getMessage(), e);
-      throw new RuntimeException(e);
-    }
-    return keyManager;
-  }
-
-  private static X509ExtendedTrustManager createTrustManager(String caPemFile) {
-    X509ExtendedTrustManager trustManager;
-    try (FileInputStream file = new FileInputStream(caPemFile)) {
-      String caPemContent = IOUtils.getContent(file);
-      List<X509Certificate> cert = PemUtils.parseCertificate(caPemContent);
-      trustManager = TrustManagerUtils.createTrustManager(cert);
-    } catch (IOException e) {
-      log.error(e.getMessage(), e);
-      throw new RuntimeException(e);
-    }
-    return trustManager;
-  }
-
-
-  public static YqlResult executeQuery(String yqlQueryRequest)
-      throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-
-    YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-
-    Optional<VespaClusterConfig> configOpt = settings.getCurrentClusterConfig();
-    VespaClusterConfig config = configOpt.orElseThrow(() ->
-        new RuntimeException("Could not get current connection configuration!")
-    );
-
-    HttpPost request = new HttpPost(config.queryEndpoint);
-    request.addHeader("content-type", "application/json;charset=UTF-8");
-    StringEntity entity = new StringEntity(yqlQueryRequest, ContentType.APPLICATION_JSON);
-    request.setEntity(entity);
-
-    HttpClientBuilder httpClientBuilder = HttpClients.custom();
-    if (settings.sslAllowAll) {
-      log.warn("Allowing all server TLS certificates");
-      allowAll(httpClientBuilder);
-    }
-    if (config.sslUseClientCert) {
-      SSLFactory sslFactory = YQL.createSslFactory(
-          config.sslCaCert,
-          config.sslClientCert,
-          config.sslClientKey);
-      LayeredConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
-          sslFactory.getSslContext(),
-          sslFactory.getSslParameters().getProtocols(),
-          sslFactory.getSslParameters().getCipherSuites(),
-          sslFactory.getHostnameVerifier()
-      );
-      httpClientBuilder.setSSLSocketFactory(socketFactory);
-    }
-    try (CloseableHttpClient httpClient = httpClientBuilder.build()) {
-      CloseableHttpResponse response = httpClient.execute(request);
-      try {
-        String responseString = EntityUtils.toString(response.getEntity());
-        log.debug("HTTP Response Status: " + response.getStatusLine());
-        log.trace("HTTP Response: " + responseString);
-        return new YqlResult(responseString);
-      } finally {
-        response.close();
-      }
-    } catch (IOException e) {
-      log.error(e.getMessage(), e);
-      throw new RuntimeException(e);
-    }
-  }
-
-  public static void allowAll(HttpClientBuilder httpClientBuilder)
-      throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
-    TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
-    SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy)
-        .build();
-    SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext,
-        NoopHostnameVerifier.INSTANCE);
-
-    Registry<ConnectionSocketFactory> socketFactoryRegistry =
-        RegistryBuilder.<ConnectionSocketFactory>create()
-            .register("https", sslsf)
-            .register("http", new PlainConnectionSocketFactory())
-            .build();
-
-    BasicHttpClientConnectionManager connectionManager =
-        new BasicHttpClientConnectionManager(socketFactoryRegistry);
-    httpClientBuilder.setConnectionManager(connectionManager);
-  }
 
   private static FileSystem jarFs = null;
 
@@ -298,9 +155,75 @@ public class YQL implements StartupActivity {
   @Override
   public void runActivity(@NotNull Project project) {
     // Run once at startup :-)
+    log.debug("vespa-yql-plugin STARTUP!");
 
-    // NOT NEEDED for now:
-    // Set properties for graphstream UI lib
-    // System.setProperty("org.graphstream.ui", "swing");
+    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+      for (; ; ) { // ever
+        try {
+          log.debug("VESPA-YQL-PLUGIN BACKGROUND CHECK...");
+
+          boolean showProgress = false;
+          if (showProgress) {
+            ProgressManager.getInstance().run(new Task.Backgroundable(project,
+                "Vespa Cluster Checker", false) {
+              @Override
+              public void run(@NotNull ProgressIndicator indicator) {
+                VespaClusterChecker.checkVespaClusters(indicator);
+              }
+            });
+          } else {
+            VespaClusterChecker.checkVespaClusters();
+          }
+
+          // Check every minute
+          Thread.sleep(60_000L);
+
+        } catch (InterruptedException e) {
+          log.error("Interrupted!!!");
+          throw new RuntimeException(e);
+        }
+      }
+    });
+
+//    ApplicationManager.getApplication().invokeLater(() -> {
+//      // Initial sleep...
+//      try {
+//        Thread.sleep(5000);
+//      } catch (InterruptedException e) {
+//        throw new RuntimeException(e);
+//      }
+//      for (;;) { // ever
+//        try {
+//          Thread.sleep(2000);
+//          log.info("VESPA-YQL-PLUGIN BACKGROUND CHECK...");
+//        } catch (InterruptedException e) {
+//          log.error("Interrupted!!!");
+//          throw new RuntimeException(e);
+//        }
+//      }
+//    }, ModalityState.NON_MODAL);
+
+//
+//    ProgressManager.getInstance().run(new Task.Backgroundable(project,
+//        "Vespa Cluster Checker", false) {
+//      @Override
+//      public void run(@NotNull ProgressIndicator indicator) {
+//        try {
+//          Thread.sleep(5000);
+//        } catch (InterruptedException e) {
+//          throw new RuntimeException(e);
+//        }
+//        for (; ; ) { // ever
+//          try {
+//            Thread.sleep(2000);
+//            log.info("VESPA-YQL-PLUGIN BACKGROUND CHECK...");
+//          } catch (InterruptedException e) {
+//            log.error("Interrupted!!!");
+//            throw new RuntimeException(e);
+//          }
+//        }
+//      }
+//    });
+
   }
 }

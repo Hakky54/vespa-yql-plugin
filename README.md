@@ -70,7 +70,8 @@ file [from disk](https://www.jetbrains.com/help/idea/managing-plugins.html#insta
       * Onlys zips the dir and calls the prepare and activate function on the config endpoint
       * No support for application code for now.
     * Simple visualization of service.xml files
-      * Right click on a services.xml file and select "Show Service Overview"
+      * Right-click on a services.xml file and select "Show Service Overview"
+    * Show connection status in the Vespa dock
   * [1.0.1] - Fix since-build for idea-version
   * [1.0.0] - First version
 

@@ -1,6 +1,9 @@
 package com.pehrs.vespa.yql.plugin.settings;
 
 import com.intellij.util.xmlb.annotations.Tag;
+import java.net.URI;
+import java.net.URISyntaxException;
+import javax.xml.transform.URIResolver;
 
 public class VespaClusterConfig {
 
@@ -20,7 +23,24 @@ public class VespaClusterConfig {
   public String sslClientKey = ""; // root + "/vespa-cluster/pki/client/client.key";
 
 
-  public VespaClusterConfig() {}
+  public URI getQueryUri() {
+    try {
+      return new URI(this.queryEndpoint);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public URI getConfigUri() {
+    try {
+      return new URI(this.configEndpoint);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public VespaClusterConfig() {
+  }
 
   public VespaClusterConfig(
       String name,
@@ -56,4 +76,5 @@ public class VespaClusterConfig {
   public String toString() {
     return "" + name;
   }
+
 }

@@ -23,11 +23,11 @@ public class YqlLogger implements Logger {
     this.name = name.replace("com.pehrs.vespa.yql.plugin.", "");
   }
 
-  private void log(Level level, String s) {
-    if (level.toInt() >= level.toInt()) {
+  private void log(Level requestedLevel, String s) {
+    if (level.toInt() <= requestedLevel.toInt()) {
       if(colorCodeOutput) {
         String levelColor = ConsoleColors.WHITE;
-        switch(level) {
+        switch(requestedLevel) {
           case TRACE, DEBUG -> levelColor = ConsoleColors.WHITE_BOLD;
           case INFO -> levelColor = ConsoleColors.GREEN;
           case WARN -> levelColor = ConsoleColors.YELLOW_BOLD;
@@ -36,7 +36,8 @@ public class YqlLogger implements Logger {
         String nameColor = ConsoleColors.BLUE;
         String msgColor = ConsoleColors.WHITE;
         System.out.printf("%s[%s] %s%s: %s%s\n",
-            levelColor, level.name(),
+            levelColor,
+            requestedLevel.name(),
             nameColor,
             this.name,
             msgColor, s,
@@ -48,22 +49,22 @@ public class YqlLogger implements Logger {
   }
 
 
-  private void log(Level level, String s, Throwable throwable) {
-    if (level.toInt() >= level.toInt()) {
-      log(level, s);
+  private void log(Level requestedLevel, String s, Throwable throwable) {
+    if (level.toInt() <= requestedLevel.toInt()) {
+      log(requestedLevel, s);
       throwable.printStackTrace();
     }
   }
 
-  private void log(Level level, String s, Object o) {
-    if (level.toInt() >= level.toInt()) {
+  private void log(Level requestedLevel, String s, Object o) {
+    if (level.toInt() <= requestedLevel.toInt()) {
       s = s.replace("{}", "" + o);
-      log(level, s);
+      log(requestedLevel, s);
     }
   }
 
-  private void log(Object[] objects, String s, Level level) {
-    if (level.toInt() >= level.toInt()) {
+  private void log(Object[] objects, String s, Level requestedLevel) {
+    if (level.toInt() <= requestedLevel.toInt()) {
       String msg = s;
       for (int i = 0; i < objects.length; i++) {
         msg = msg.replaceFirst("\\{}", "" + objects[i]);
@@ -72,12 +73,12 @@ public class YqlLogger implements Logger {
     }
   }
 
-  private void log(Level level, String s, Object o, Object o1) {
-    if (level.toInt() >= level.toInt()) {
+  private void log(Level requestedLevel, String s, Object o, Object o1) {
+    if (level.toInt() <= requestedLevel.toInt()) {
       String msg = s
           .replaceFirst("\\{}", "" + o)
           .replaceFirst("\\{}", "" + o1);
-      log(level, msg);
+      log(requestedLevel, msg);
     }
   }
 

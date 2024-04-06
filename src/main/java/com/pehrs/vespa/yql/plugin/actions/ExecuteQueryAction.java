@@ -2,27 +2,22 @@ package com.pehrs.vespa.yql.plugin.actions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.pehrs.vespa.yql.plugin.YQL;
-import com.pehrs.vespa.yql.plugin.YqlFileType;
+import com.pehrs.vespa.yql.plugin.VespaClusterConnection;
 import com.pehrs.vespa.yql.plugin.YqlResult;
 import com.pehrs.vespa.yql.plugin.YqlResult.YqlQueryError;
 import com.pehrs.vespa.yql.plugin.psi.YqlFile;
 import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsState;
-import java.io.IOException;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -76,7 +71,7 @@ public class ExecuteQueryAction extends AnAction {
       log.debug("Run Query:\n" + pretty);
 
       // YqlResult result = new YqlResult(YqlResult.YQL_SAMPLE_RESULT);
-      YqlResult result = YQL.executeQuery(pretty);
+      YqlResult result = VespaClusterConnection.executeQuery(pretty);
       YqlResult.updateResult(result);
 
       List<YqlQueryError> errors = result.getErrors();

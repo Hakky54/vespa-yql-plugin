@@ -33,6 +33,7 @@
       <li>Package, prepare and activate simple vespa applications.</li>
       <li>Support for TLS/SSL connections</li>
       <li>Simple visualization of services.xml files</li>
+      <li>Show connection status in the Vespa sidebar panel</li>
     </ul>
     For more information see the <a href="https://github.com/pehrs/vespa-yql-plugin">project site</a>.
     </p>
@@ -51,8 +52,10 @@
       </ul></li>
       <li>Simple visualization of service.xml files
         <ul class="incremental">
-          <li>Right click on a services.xml file and select “Show Service Overview”</li>
-      </ul></li>
+          <li>Right-click on a services.xml file and select “Show Service Overview”</li>
+      </ul>
+      </li>
+      <li>Show connection status in the Vespa sidebar panel</li>
   </ul></li>
   <li>[1.0.1] - Fix since-build for idea-version</li>
   <li>[1.0.0] - First version</li>

@@ -36,7 +36,7 @@ public class YQLTest {
     String caPemFile = root + "/vespa-cluster/pki/vespa/ca-vespa.pem";
     String clientCertFile = root + "/vespa-cluster/pki/client/client.pem";
     String clientKeyFile = root + "/vespa-cluster/pki/client/client.key";
-    SSLFactory sslFactory = YQL.createSslFactory(caPemFile, clientCertFile,
+    SSLFactory sslFactory = VespaClusterConnection.createSslFactory(caPemFile, clientCertFile,
         clientKeyFile);
     LayeredConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
         sslFactory.getSslContext(),

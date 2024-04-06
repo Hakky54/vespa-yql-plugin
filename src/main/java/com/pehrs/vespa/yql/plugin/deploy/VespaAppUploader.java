@@ -3,7 +3,7 @@ package com.pehrs.vespa.yql.plugin.deploy;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.pehrs.vespa.yql.plugin.YQL;
+import com.pehrs.vespa.yql.plugin.VespaClusterConnection;
 import com.pehrs.vespa.yql.plugin.settings.VespaClusterConfig;
 import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsState;
 import java.io.File;
@@ -95,7 +95,7 @@ public abstract class VespaAppUploader {
 //      YQL.allowAll(httpClientBuilder);
 //    }
     if (config.sslUseClientCert) {
-      SSLFactory sslFactory = YQL.createSslFactory(
+      SSLFactory sslFactory = VespaClusterConnection.createSslFactory(
           config.sslCaCert,
           config.sslClientCert,
           config.sslClientKey);
