@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class ExecuteQueryAction extends AnAction {
 
-  static Logger log = LoggerFactory.getLogger(ExecuteQueryAction.class);
+  private static final Logger log = LoggerFactory.getLogger(ExecuteQueryAction.class);
 
   private static ObjectMapper objectMapper = new ObjectMapper();
 

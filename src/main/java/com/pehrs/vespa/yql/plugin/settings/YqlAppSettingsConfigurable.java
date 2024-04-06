@@ -28,7 +28,7 @@ public class YqlAppSettingsConfigurable implements Configurable {
   @Nullable
   @Override
   public JComponent createComponent() {
-    mySettingsComponent = new YqlAppSettingsComponent(ProjectManager.getInstance().getDefaultProject(), true);
+    mySettingsComponent = new YqlAppSettingsComponent(ProjectManager.getInstance().getDefaultProject());
     return mySettingsComponent.getPanel();
   }
 
@@ -43,6 +43,12 @@ public class YqlAppSettingsConfigurable implements Configurable {
     Set<VespaClusterConfig> settingsConfigSet = new HashSet<>(settings.clusterConfigs);
     modified = modified || !configs.equals(settingsConfigSet);
 
+    modified = modified || (mySettingsComponent.getSslAllowAll() != settings.sslAllowAll);
+//    modified = modified || (mySettingsComponent.getSslUseClientCert() != settings.sslUseClientCert);
+//    modified = modified || !mySettingsComponent.getSslCaCert().equals(settings.sslCaCert);
+//    modified = modified || !mySettingsComponent.getSslClientCert().equals(settings.sslClientCert);
+//    modified = modified || !mySettingsComponent.getSslClientKey().equals(settings.sslClientKey);
+
     return modified;
   }
 
@@ -52,15 +58,21 @@ public class YqlAppSettingsConfigurable implements Configurable {
     settings.zipkinEndpoint = mySettingsComponent.getZipkinEndpoint();
     settings.browserScript = mySettingsComponent.getBrowserScript();
     settings.clusterConfigs = mySettingsComponent.getVespaClusterConfigs();
+    settings.sslAllowAll = mySettingsComponent.getSslAllowAll();
+//    settings.sslUseClientCert = mySettingsComponent.getSslUseClientCert();
+//    settings.sslCaCert = mySettingsComponent.getSslCaCert();
+//    settings.sslClientCert = mySettingsComponent.getSslClientCert();
+//    settings.sslClientKey = mySettingsComponent.getSslClientKey();
     YqlAppSettingsStateListener.notifyListeners(settings);
   }
 
   @Override
   public void reset() {
-    YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-    mySettingsComponent.setZipkinEndpoint(settings.zipkinEndpoint);
-    mySettingsComponent.setBrowserScript(settings.browserScript);
-    mySettingsComponent.setVespaClusterConfigs(settings.clusterConfigs);
+   //  YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
+//    mySettingsComponent.setZipkinEndpoint(settings.zipkinEndpoint);
+//    mySettingsComponent.setBrowserScript(settings.browserScript);
+//    mySettingsComponent.setVespaClusterConfigs(settings.clusterConfigs);
+    mySettingsComponent.refresh();
   }
 
   @Override

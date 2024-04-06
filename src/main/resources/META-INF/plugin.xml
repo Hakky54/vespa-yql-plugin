@@ -29,17 +29,35 @@
       <li>Simple highlighting of the request and the yql query value.</li>
       <li>Simple completion support is given for request snippets and the YQL query string.</li>
       <li>Render a tree view of any trace in the YQL response.</li>
+      <li>Upload traces to Zipkin.</li>
+      <li>Package, prepare and activate simple vespa applications.</li>
+      <li>Support for TLS/SSL connections</li>
+      <li>Simple visualization of services.xml files</li>
     </ul>
     For more information see the <a href="https://github.com/pehrs/vespa-yql-plugin">project site</a>.
     </p>
   ]]></description>
 
   <change-notes><![CDATA[
-<h2>New Features</h2>
-<ul>
+
+<ul class="incremental">
+  <li>[1.0.2] - TLS and simple upload
+    <ul class="incremental">
+      <li>TLS support for connections (not tested on vespa-cloud as I do not have a vespa-cloud)</li>
+      <li>Right click on application dir and select “Package, Prepare and Activate”
+        <ul class="incremental">
+          <li>Onlys zips the dir and calls the prepare and activate function on the config endpoint</li>
+          <li>No support for application code for now.</li>
+      </ul></li>
+      <li>Simple visualization of service.xml files
+        <ul class="incremental">
+          <li>Right click on a services.xml file and select “Show Service Overview”</li>
+      </ul></li>
+  </ul></li>
   <li>[1.0.1] - Fix since-build for idea-version</li>
   <li>[1.0.0] - First version</li>
 </ul>
+
 ]]></change-notes>
 
   <!-- Product and plugin compatibility requirements.
@@ -70,7 +88,7 @@
         anchor="last"/>
 
       <action
-        id="ExecuteQueryAction"
+        id="YqlExecuteQueryAction"
         class="com.pehrs.vespa.yql.plugin.actions.ExecuteQueryAction"
         text="Execute YQL Request"
         description="Execute YQL Request in current Vespa Cluster"
@@ -79,21 +97,47 @@
         <keyboard-shortcut
           keymap="$default"
           first-keystroke="control ENTER"/>
+        <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+        <add-to-group group-id="EditorPopupMenu.Run" anchor="first"/>
+        <!--
+        <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        -->
+
         <!--
         <add-to-group group-id="com.pehrs.vespa.yql.plugin.actions.YqlGroup" anchor="first"/>
-        <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         <add-to-group group-id="RunMenu" anchor="first"/>
         -->
       </action>
+      <action
+        id="YqlPrepareAndActivateAction"
+        class="com.pehrs.vespa.yql.plugin.actions.PrepareAndActivateAction"
+        text="Package, Prepare and Activate Application"
+        description="Package and upload Vespa application to current Vespa Cluster"
+        icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
+      >
+        <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+        <!--
+        <add-to-group group-id="RunMenu" anchor="first"/>
+        -->
+      </action>
+      <action class="com.pehrs.vespa.yql.plugin.actions.YqlServiceXmlAction"
+        id="YqlServiceXmlAction"
+        text="Show Services Overview"
+        description="Show overview of services"
+        icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE">
+        <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+      </action>
     </group>
-
-
 
   </actions>
 
   <!-- Extension points defined by the plugin.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
   <extensions defaultExtensionNs="com.intellij">
+
+    <postStartupActivity implementation="com.pehrs.vespa.yql.plugin.YQL"/>
+
+
     <actionPromoter implementation="com.pehrs.vespa.yql.plugin.actions.YqlActionPromoter"/>
 
     <applicationService
@@ -104,6 +148,12 @@
       id="com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsConfigurable"
       displayName="Vespa YQL"/>
 
+    <applicationConfigurable
+      parentId="tools"
+      instance="com.pehrs.vespa.yql.plugin.settings.YqlColorsConfigurable"
+      id="com.pehrs.vespa.yql.plugin.settings.YqlColorsConfigurable"
+      displayName="Vespa YQL Colors"/>
+
     <notificationGroup
       id="Vespa YQL"
       displayType="BALLOON"/>
@@ -112,12 +162,17 @@
       secondary="false"
       anchor="right"
       icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
-      factoryClass="com.pehrs.vespa.yql.plugin.dock.YqlDockFactory" />
+      factoryClass="com.pehrs.vespa.yql.plugin.dock.YqlDockFactory"/>
     <toolWindow id="Vespa YQL Results"
       secondary="false"
       anchor="bottom"
       icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
       factoryClass="com.pehrs.vespa.yql.plugin.results.YqlResultsFactory"/>
+    <toolWindow id="services.xml - Services/Node Overview"
+      secondary="false"
+      anchor="bottom"
+      icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
+      factoryClass="com.pehrs.vespa.yql.plugin.graph.VespaServicesDockFactory"/>
 
     <fileType
       name="YQL"
@@ -140,7 +195,8 @@
       language="YQL"
       implementationClass="com.pehrs.vespa.yql.plugin.completions.YqlCompletionContributor"/>
 
-    <lang.formatter language="YQL" implementationClass="com.pehrs.vespa.yql.plugin.formatter.YqlFormattingBuilderModel"/>
+    <lang.formatter language="YQL"
+      implementationClass="com.pehrs.vespa.yql.plugin.formatter.YqlFormattingBuilderModel"/>
 
   </extensions>
 </idea-plugin>

@@ -39,6 +39,10 @@ public class YqlResultsTablePanel extends JBPanel {
     createComponents();
   }
 
+  protected void notifyModel() {
+    this.tableModel.resultUpdated(YqlResult.getYqlResult());
+  }
+
   private void createComponents() {
     JBTable resultsTable = new JBTable();
     resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);

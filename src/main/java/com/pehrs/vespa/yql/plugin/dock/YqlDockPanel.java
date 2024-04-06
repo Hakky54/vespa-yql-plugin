@@ -192,9 +192,10 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
 
     JBLabel verLabel = new JBLabel(
         "<html><span style='font-size:10px'>"
-            + plugin.getName() + " ver: " + plugin.getVersion() + " " + YQL.getBuildTimestamp()
+            + plugin.getName() + " ver: " + plugin.getVersion()
             + "</span></html>"
     );
+    verLabel.setToolTipText(YQL.getBuildTimestamp() + " " + YQL.getBuiltByUser());
     verLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 
     JPanel myMainPanel = FormBuilder.createFormBuilder()

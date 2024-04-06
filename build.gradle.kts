@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "org.pehrs"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
@@ -19,6 +19,27 @@ repositories {
 dependencies {
     compileOnly("org.projectlombok:lombok:1.18.20")
     annotationProcessor("org.projectlombok:lombok:1.18.20")
+
+    // FIXME: The documentapi libs do not work with Intellij
+    // The deps mess things up
+    //implementation("com.yahoo.vespa:documentapi:8.324.16")
+    //implementation("com.yahoo.vespa:documentapi-dependencies:8.324.16")
+
+    implementation("com.yahoo.vespa:vespa-feed-client:8.324.16")
+
+    // For apache http client SSL connectivity
+    implementation("io.github.hakky54:sslcontext-kickstart:8.3.4")
+    implementation("io.github.hakky54:sslcontext-kickstart-for-pem:8.3.4")
+
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.17.0")
+
+    implementation("org.jgrapht:jgrapht-core:1.5.2")
+    implementation("org.jgrapht:jgrapht-io:1.5.2")
+    implementation("org.jgrapht:jgrapht-ext:1.5.2")
+
+    implementation("org.graphstream:gs-core:2.0")
+    implementation("org.graphstream:gs-ui-swing:2.0")
+
 }
 
 sourceSets {

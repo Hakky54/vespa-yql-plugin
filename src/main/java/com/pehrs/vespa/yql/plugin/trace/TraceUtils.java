@@ -30,7 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TraceUtils {
-  static Logger log = LoggerFactory.getLogger(TraceUtils.class);
+
+  private static final Logger log = LoggerFactory.getLogger(TraceUtils.class);
 
   public static List<YqlTraceMessage> getYqlTraceMessages(YqlResult result) {
     return getTraceRoots(result)

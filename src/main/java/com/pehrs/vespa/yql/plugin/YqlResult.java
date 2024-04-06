@@ -123,6 +123,9 @@ public class YqlResult {
 
   public List<String> getColumnNames() {
     JsonNode children = this.result.get("root").get("children");
+    if(children == null) {
+      return List.of();
+    }
     JsonNode firstChild = children.iterator().next();
     JsonNode fields = firstChild.get("fields");
     return StreamSupport.stream(
@@ -140,6 +143,9 @@ public class YqlResult {
 
   public List<YqlResultRow> getRows() {
     JsonNode children = this.result.get("root").get("children");
+    if(children==null) {
+      return List.of();
+    }
     return StreamSupport.stream(
             Spliterators.spliteratorUnknownSize(children.iterator(), Spliterator.ORDERED),
             false)

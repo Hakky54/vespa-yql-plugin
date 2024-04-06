@@ -10,9 +10,13 @@ import java.util.stream.Collectors;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import org.jetbrains.annotations.Nls;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class YqlResultsTableModel extends AbstractTableModel implements TableModel,
     YqlResultListener {
+
+  private static final Logger log = LoggerFactory.getLogger(YqlResultsTableModel.class);
 
   YqlResult result = null;
   List<YqlResultRow> rows = null;
@@ -101,20 +105,24 @@ public class YqlResultsTableModel extends AbstractTableModel implements TableMod
 
   @Override
   public void resultUpdated(YqlResult result) {
-    this.result = result;
-    List<YqlQueryError> errors = result.getErrors();
-    if (errors.isEmpty()) {
-      this.columns = result.getColumnNames();
-      this.rows = result.getRows();
-    } else {
-      this.columns = List.of("code", "summary", "message");
-      this.rows = errors.stream().map(error -> new YqlResultRow(0.0d, Map.of(
-          "code", error.code(),
-          "summary", error.summary(),
-          "message", error.message()
-      ))).collect(Collectors.toList());
+    try {
+      this.result = result;
+      List<YqlQueryError> errors = result.getErrors();
+      if (errors.isEmpty()) {
+        this.columns = result.getColumnNames();
+        this.rows = result.getRows();
+      } else {
+        this.columns = List.of("code", "summary", "message");
+        this.rows = errors.stream().map(error -> new YqlResultRow(0.0d, Map.of(
+            "code", error.code(),
+            "summary", error.summary(),
+            "message", error.message()
+        ))).collect(Collectors.toList());
+      }
+      fireTableStructureChanged();
+      fireTableDataChanged();
+    } catch (Exception ex) {
+      log.error(ex.getMessage(), ex);
     }
-    fireTableStructureChanged();
-    fireTableDataChanged();
   }
 }
