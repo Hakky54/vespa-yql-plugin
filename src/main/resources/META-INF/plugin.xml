@@ -30,10 +30,11 @@
       <li>Simple completion support is given for request snippets and the YQL query string.</li>
       <li>Render a tree view of any trace in the YQL response.</li>
       <li>Upload traces to Zipkin.</li>
-      <li>Package, prepare and activate simple vespa applications.</li>
-      <li>Support for TLS/SSL connections</li>
+      <li>Package, prepare and activate (Java based projects).</li>
+      <li>Support for TLS/SSL connections to Vespa cluster and containers</li>
       <li>Simple visualization of services.xml files</li>
       <li>Show connection status in the Vespa sidebar panel</li>
+      <li>Show Vespa cluster logs (mapped from docker containers)</li>
     </ul>
     For more information see the <a href="https://github.com/pehrs/vespa-yql-plugin">project site</a>.
     </p>
@@ -42,6 +43,15 @@
   <change-notes><![CDATA[
 
 <ul class="incremental">
+  <li>[1.0.3] - Support for Vespa Java Apps
+    <ul class="incremental">
+      <li>Package, prepare and activate will call maven before packaging and uploading the application.</li>
+      <li>The Vespa tool windows (except for the Side panel) will be hidden from start until they are needed.</li>
+      <li>New tool window for Vespa Cluster logs
+        <ul class="incremental">
+          <li>Works with log files/dirs mapped from docker containers (<code>vespa.log</code> or <code>logarchive</code> directory).</li>
+      </ul></li>
+  </ul></li>
   <li>[1.0.2] - TLS and simple upload
     <ul class="incremental">
       <li>TLS support for connections (not tested on vespa-cloud as I do not have a vespa-cloud)</li>
@@ -53,19 +63,26 @@
       <li>Simple visualization of service.xml files
         <ul class="incremental">
           <li>Right-click on a services.xml file and select “Show Service Overview”</li>
-      </ul>
-      </li>
-      <li>Show connection status in the Vespa sidebar panel</li>
+      </ul></li>
+      <li>Show connection status in the Vespa dock</li>
+      <li>Bugfix for Vespa Results toolWindow
+        <ul class="incremental">
+          <li>Responses will now turn up on first execution</li>
+      </ul></li>
   </ul></li>
   <li>[1.0.1] - Fix since-build for idea-version</li>
   <li>[1.0.0] - First version</li>
 </ul>
+
 
 ]]></change-notes>
 
   <!-- Product and plugin compatibility requirements.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
   <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.lang</depends>
+  <depends>com.intellij.modules.java-capable</depends>
+  <depends>org.jetbrains.idea.maven</depends>
 
   <actions>
     <!-- FIXME: This action is not needed as we use the lang.formatter below -->
@@ -101,10 +118,10 @@
           keymap="$default"
           first-keystroke="control ENTER"/>
         <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
-        <add-to-group group-id="EditorPopupMenu.Run" anchor="first"/>
         <!--
-        <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        <add-to-group group-id="EditorPopupMenu.Run" anchor="first"/>
         -->
+        <add-to-group group-id="EditorPopupMenu" anchor="first"/>
 
         <!--
         <add-to-group group-id="com.pehrs.vespa.yql.plugin.actions.YqlGroup" anchor="first"/>
@@ -118,6 +135,11 @@
         description="Package and upload Vespa application to current Vespa Cluster"
         icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
       >
+        <!--
+        <add-to-group group-id="ProjectViewPopupMenu"
+          relative-to-action="ProjectViewPopupMenuRunGroup"
+          anchor="after"/>
+          -->
         <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
         <!--
         <add-to-group group-id="RunMenu" anchor="first"/>
@@ -130,6 +152,13 @@
         icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE">
         <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
       </action>
+
+      <action class="com.pehrs.vespa.yql.plugin.actions.OpenLogsAction"
+        id="YqlOpenVespaLogs"
+        text="Open Vespa Logs"
+        description="Show the Vespa cluster logs"
+        icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE">
+      </action>
     </group>
 
   </actions>
@@ -139,7 +168,6 @@
   <extensions defaultExtensionNs="com.intellij">
 
     <postStartupActivity implementation="com.pehrs.vespa.yql.plugin.YQL"/>
-
 
     <actionPromoter implementation="com.pehrs.vespa.yql.plugin.actions.YqlActionPromoter"/>
 
@@ -166,16 +194,27 @@
       anchor="right"
       icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
       factoryClass="com.pehrs.vespa.yql.plugin.dock.YqlDockFactory"/>
+    <!--
     <toolWindow id="Vespa YQL Results"
       secondary="false"
       anchor="bottom"
       icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
       factoryClass="com.pehrs.vespa.yql.plugin.results.YqlResultsFactory"/>
-    <toolWindow id="services.xml - Services/Node Overview"
+      -->
+    <!--
+    <toolWindow id="Vespa - Services/Node Overview"
       secondary="false"
       anchor="bottom"
       icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
-      factoryClass="com.pehrs.vespa.yql.plugin.graph.VespaServicesDockFactory"/>
+      factoryClass="com.pehrs.vespa.yql.plugin.serviceview.VespaServicesDockFactory"/>
+      -->
+    <!--
+    <toolWindow id="Vespa logs"
+      secondary="false"
+      anchor="bottom"
+      icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
+      factoryClass="com.pehrs.vespa.yql.plugin.logfile.VespaLogToolWindowFactory"/>
+      -->
 
     <fileType
       name="YQL"

@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "org.pehrs"
-version = "1.0.2"
+version = "1.0.3"
 
 repositories {
     mavenCentral()
@@ -75,7 +75,8 @@ intellij {
     System.out.println("Build for VERSION " + ideaVersion)
     type.set("IC") // Target IDE Platform
 
-    plugins.set(listOf(/* Plugin Dependencies */))
+    plugins.set(listOf("com.intellij.java", "org.jetbrains.idea.maven"))
+
 }
 
 tasks {

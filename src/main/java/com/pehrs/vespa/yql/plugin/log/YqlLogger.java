@@ -1,5 +1,8 @@
 package com.pehrs.vespa.yql.plugin.log;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
@@ -7,15 +10,14 @@ import org.slf4j.event.Level;
 public class YqlLogger implements Logger {
 
   // FIXME: Set this from configuration
+  @Setter
   private static Level level = Level.DEBUG;
+
+  private static final SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z");
 
   // Let's assume that we are in Intellij console :-)
   // FIXME: Set this from configuration
   private static boolean colorCodeOutput = true; // (System.console() != null);
-
-  public static void setLevel(Level level) {
-    level = level;
-  }
 
   private final String name;
 
@@ -23,27 +25,28 @@ public class YqlLogger implements Logger {
     this.name = name.replace("com.pehrs.vespa.yql.plugin.", "");
   }
 
-  private void log(Level requestedLevel, String s) {
+  private void log(Level requestedLevel, String msg) {
     if (level.toInt() <= requestedLevel.toInt()) {
-      if(colorCodeOutput) {
-        String levelColor = ConsoleColors.WHITE;
-        switch(requestedLevel) {
-          case TRACE, DEBUG -> levelColor = ConsoleColors.WHITE_BOLD;
-          case INFO -> levelColor = ConsoleColors.GREEN;
-          case WARN -> levelColor = ConsoleColors.YELLOW_BOLD;
-          case ERROR -> levelColor = ConsoleColors.RED_BOLD;
-        }
-        String nameColor = ConsoleColors.BLUE;
-        String msgColor = ConsoleColors.WHITE;
-        System.out.printf("%s[%s] %s%s: %s%s\n",
+      String ts = dateFmt.format(new Date(System.currentTimeMillis()));
+      if (colorCodeOutput) {
+        String levelColor = switch (requestedLevel) {
+          case TRACE, DEBUG -> ConsoleColors.WHITE_BOLD;
+          case INFO -> ConsoleColors.GREEN;
+          case WARN -> ConsoleColors.YELLOW_BOLD;
+          case ERROR -> ConsoleColors.RED_BOLD;
+        };
+        System.out.printf("%s%s %s[%s] %s%s: %s%s\n",
+            ConsoleColors.YELLOW,
+            ts,
             levelColor,
             requestedLevel.name(),
-            nameColor,
+            ConsoleColors.BLUE,
             this.name,
-            msgColor, s,
+            ConsoleColors.WHITE,
+            msg,
             ConsoleColors.RESET);
       } else {
-        System.out.printf("[%s] %s: %s\n", level.name(), this.name, s);
+        System.out.printf("%s [%s] %s: %s\n", ts, level.name(), this.name, msg);
       }
     }
   }

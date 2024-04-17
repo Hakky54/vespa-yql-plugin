@@ -122,7 +122,14 @@ public class YqlResult {
   }
 
   public List<String> getColumnNames() {
-    JsonNode children = this.result.get("root").get("children");
+    if(this.result == null) {
+      return List.of();
+    }
+    JsonNode root = this.result.get("root");
+    if(root == null) {
+      return List.of();
+    }
+    JsonNode children = root.get("children");
     if(children == null) {
       return List.of();
     }
@@ -183,10 +190,12 @@ public class YqlResult {
                           yield Pair.of(fieldName, floats);
                         } else {
                           // FIXME: Support more types when needed...
-                          yield Pair.of(fieldName, null); // This would fail!!!
+                          // Fallback
+                          yield Pair.of(fieldName, "" + fieldVal); // This would fail!!!
                         }
                       } else {
-                        yield Pair.of(fieldName, null); // This would fail!!!
+                        // Fallback
+                        yield Pair.of(fieldName, "" + fieldVal); // This would fail!!!
                       }
                     }
                     case BOOLEAN -> Pair.of(fieldName, fieldVal.asBoolean());

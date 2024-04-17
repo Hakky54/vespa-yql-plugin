@@ -3,8 +3,8 @@ package com.pehrs.vespa.yql.plugin.results;
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.json.JsonFileType;
 import com.intellij.json.JsonLanguage;
-import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -21,6 +21,10 @@ import com.intellij.openapi.fileChooser.FileSaverDialog;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.project.ProjectManagerListener;
+import com.intellij.openapi.project.VetoableProjectManagerListener;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
@@ -29,23 +33,46 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.JBUI.Borders;
 import com.pehrs.vespa.yql.plugin.YqlResult;
 import com.pehrs.vespa.yql.plugin.YqlResult.YqlResultListener;
+import com.pehrs.vespa.yql.plugin.util.NotificationUtils;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.PrintWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class YqlResultsJsonPanel extends JBPanel {
+public class YqlResultsJsonPanel extends JBPanel implements YqlResultListener, Disposable, VetoableProjectManagerListener {
 
   private final Project project;
   private Editor editor;
+  private Document doc;
 
   public YqlResultsJsonPanel(Project project) {
     super(new BorderLayout());
     this.project = project;
     super.setBorder(Borders.empty());
     createComponents();
+
+    ProjectManager.getInstance().addProjectManagerListener(this);
+    Disposer.register(project, this);
   }
+
+  @Override
+  public  void projectClosing(@NotNull Project project) {
+    this.dispose();
+  }
+
+  @Override
+  public void dispose() {
+    // Below fails, maybe we do not need to do this?
+    // ProjectManager.getInstance().removeProjectManagerListener(this);
+    this.editor = null;
+  }
+
+  @Override
+  public boolean canClose(@NotNull Project project) {
+    return true;
+  }
+
 
   private void createComponents() {
 
@@ -55,7 +82,7 @@ public class YqlResultsJsonPanel extends JBPanel {
 
     // @NotNull Document doc = factory.createDocument("");
     // FIXME: Trying to get folding to work for editor
-    final Document doc = factory.createDocument("");
+    this.doc = factory.createDocument("");
     LightVirtualFile lvf = new LightVirtualFile(".yql-response.json",
         JsonFileType.INSTANCE,
         "");
@@ -75,22 +102,15 @@ public class YqlResultsJsonPanel extends JBPanel {
     editorSettings.setAllowSingleLogicalLineFolding(true);
     editorSettings.setRightMarginShown(true);
 
-    YqlResult.addResultListener(new YqlResultListener() {
-      @Override
-      public void resultUpdated(YqlResult result) {
-        ApplicationManager.getApplication().runWriteAction(() -> {
-          doc.setText(result.toString());
-
-//          VirtualFile vfile = null;
-//          try {
-//            vfile = project.getBaseDir().createChildData(project, ".vespa-response.json");
-//          } catch (IOException e) {
-//            e.printStackTrace();
-//          }
-//          Document document = FileDocumentManager.getInstance().getDocument(vfile);
-        });
-      }
-    });
+    YqlResult.addResultListener(this);
+//    YqlResult.addResultListener(new YqlResultListener() {
+//      @Override
+//      public void resultUpdated(YqlResult result) {
+//        ApplicationManager.getApplication().runWriteAction(() -> {
+//          doc.setText(result.toString());
+//        });
+//      }
+//    });
 
     AnAction exportAction = new DumbAwareAction("Export JSON", "Export JSON result",
         Actions.Download) {
@@ -112,10 +132,7 @@ public class YqlResultsJsonPanel extends JBPanel {
             out.print(doc.getText());
             out.flush();
           } catch (Exception ex) {
-            NotificationGroupManager.getInstance()
-                .getNotificationGroup("Vespa YQL")
-                .createNotification(ex.getMessage(), NotificationType.ERROR)
-                .notify(project);
+            NotificationUtils.showException(project, ex);
           }
         }
       }
@@ -151,4 +168,10 @@ public class YqlResultsJsonPanel extends JBPanel {
     super.add(editor.getComponent(), BorderLayout.CENTER);
   }
 
+  @Override
+  public void resultUpdated(YqlResult result) {
+        ApplicationManager.getApplication().runWriteAction(() -> {
+          doc.setText(result.toString());
+        });
+  }
 }

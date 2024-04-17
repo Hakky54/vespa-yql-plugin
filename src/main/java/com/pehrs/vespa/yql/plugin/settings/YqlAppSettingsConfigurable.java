@@ -2,6 +2,7 @@ package com.pehrs.vespa.yql.plugin.settings;
 
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.ProjectManager;
+import com.pehrs.vespa.yql.plugin.logserver.VespaLogsWatcher;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +37,10 @@ public class YqlAppSettingsConfigurable implements Configurable {
   public boolean isModified() {
     YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
     boolean modified = !mySettingsComponent.getZipkinEndpoint().equals(settings.zipkinEndpoint);
+    modified = modified || !mySettingsComponent.getMavenParameters().equals(settings.mavenParameters);
+    modified = modified || !mySettingsComponent.getTenant().equals(settings.tenant);
+    modified = modified || !mySettingsComponent.getLogsPath().equals(settings.logsPath);
+    modified = modified || (mySettingsComponent.getMonitorLogs()!= settings.doMonitorLogs);
 
     List<VespaClusterConfig> configs = mySettingsComponent.getVespaClusterConfigs();
     modified = modified || configs.size() != settings.clusterConfigs.size();
@@ -44,10 +49,6 @@ public class YqlAppSettingsConfigurable implements Configurable {
     modified = modified || !configs.equals(settingsConfigSet);
 
     modified = modified || (mySettingsComponent.getSslAllowAll() != settings.sslAllowAll);
-//    modified = modified || (mySettingsComponent.getSslUseClientCert() != settings.sslUseClientCert);
-//    modified = modified || !mySettingsComponent.getSslCaCert().equals(settings.sslCaCert);
-//    modified = modified || !mySettingsComponent.getSslClientCert().equals(settings.sslClientCert);
-//    modified = modified || !mySettingsComponent.getSslClientKey().equals(settings.sslClientKey);
 
     return modified;
   }
@@ -56,22 +57,19 @@ public class YqlAppSettingsConfigurable implements Configurable {
   public void apply() {
     YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
     settings.zipkinEndpoint = mySettingsComponent.getZipkinEndpoint();
-    settings.browserScript = mySettingsComponent.getBrowserScript();
+    settings.mavenParameters = mySettingsComponent.getMavenParameters();
+    settings.logsPath = mySettingsComponent.getLogsPath();
+    settings.doMonitorLogs = mySettingsComponent.getMonitorLogs();
+    settings.tenant = mySettingsComponent.getTenant();
     settings.clusterConfigs = mySettingsComponent.getVespaClusterConfigs();
     settings.sslAllowAll = mySettingsComponent.getSslAllowAll();
-//    settings.sslUseClientCert = mySettingsComponent.getSslUseClientCert();
-//    settings.sslCaCert = mySettingsComponent.getSslCaCert();
-//    settings.sslClientCert = mySettingsComponent.getSslClientCert();
-//    settings.sslClientKey = mySettingsComponent.getSslClientKey();
+    VespaLogsWatcher.forceReload();
     YqlAppSettingsStateListener.notifyListeners(settings);
   }
 
   @Override
   public void reset() {
-   //  YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-//    mySettingsComponent.setZipkinEndpoint(settings.zipkinEndpoint);
-//    mySettingsComponent.setBrowserScript(settings.browserScript);
-//    mySettingsComponent.setVespaClusterConfigs(settings.clusterConfigs);
+
     mySettingsComponent.refresh();
   }
 

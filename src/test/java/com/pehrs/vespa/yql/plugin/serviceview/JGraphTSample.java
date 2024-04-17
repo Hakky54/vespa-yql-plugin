@@ -1,6 +1,5 @@
-package com.pehrs.vespa.yql.plugin.graph;
+package com.pehrs.vespa.yql.plugin.serviceview;
 
-import org.jgrapht.ext.JGraphXAdapter;
 import org.junit.Test;
 
 import org.jgrapht.*;

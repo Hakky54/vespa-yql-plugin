@@ -1,16 +1,20 @@
 package com.pehrs.vespa.yql.plugin.dock;
 
-import com.intellij.icons.AllIcons;
-import com.intellij.icons.AllIcons.Diff;
+import static com.pehrs.vespa.yql.plugin.dock.VespaClusterStatusTableModel.CLUSTER_COLUMN;
+import static com.pehrs.vespa.yql.plugin.dock.VespaClusterStatusTableModel.CONFIG_COLUMN;
+import static com.pehrs.vespa.yql.plugin.dock.VespaClusterStatusTableModel.QUERY_COLUMN;
+import static com.pehrs.vespa.yql.plugin.dock.VespaClusterStatusTableModel.USE_COLUMN;
+
+import com.intellij.icons.AllIcons.Actions;
 import com.intellij.icons.AllIcons.General;
-import com.intellij.icons.AllIcons.RunConfigurations.TestState;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
+import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.options.ShowSettingsUtil;
-import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.AnActionButton;
 import com.intellij.ui.ToolbarDecorator;
@@ -24,6 +28,7 @@ import com.pehrs.vespa.yql.plugin.VespaClusterChecker;
 import com.pehrs.vespa.yql.plugin.VespaClusterChecker.StatusListener;
 import com.pehrs.vespa.yql.plugin.YQL;
 import com.pehrs.vespa.yql.plugin.YqlIcons;
+import com.pehrs.vespa.yql.plugin.logserver.VespaLogsViewFactory;
 import com.pehrs.vespa.yql.plugin.settings.VespaClusterConfig;
 import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsState;
 import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsStateListener;
@@ -42,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener {
 
   private static final Logger log = LoggerFactory.getLogger(YqlDockPanel.class);
-  
+
   private final Project project;
 //  private DefaultMutableTreeNode configRoot;
 //  private DefaultTreeModel treeModel;
@@ -50,6 +55,8 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
 
   private JBTable clusterTable;
   private VespaClusterStatusTableModel clusterTableModel;
+  private AnActionButton configActionBtn;
+  private AnActionButton openLogsConfigBtn;
 
 
   public YqlDockPanel(Project project) {
@@ -142,7 +149,7 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
           int selectedRow = clusterTable.getSelectedRow();
           int selectedColumn = clusterTable.getSelectedColumn();
           // log.info("CLICK in row: " + selectedRow +", column: " + selectedColumn);
-          if(selectedColumn == 1) {
+          if (selectedColumn == USE_COLUMN) {
             YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
             VespaClusterConfig selectedConfig = settings.clusterConfigs.get(selectedRow);
             settings.currentConnection = selectedConfig.name;
@@ -152,64 +159,66 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
         super.mouseClicked(e);
       }
     });
-    this.clusterTable.setDefaultRenderer(String.class, (table, value, isSelected, hasFocus, row, column) -> {
-      String txt = (String) value;
-      switch(column) {
-        case 0: {
-          YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-          VespaClusterConfig config = settings.clusterConfigs.get(row);
-          label.setText(txt);
-          label.setToolTipText(String.format("%s - %s %s", config.name, config.queryEndpoint, config.configEndpoint));
+    this.clusterTable.setDefaultRenderer(String.class,
+        (table, value, isSelected, hasFocus, row, column) -> {
+          String txt = (String) value;
+          switch (column) {
+            case CLUSTER_COLUMN: {
+              YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
+              VespaClusterConfig config = settings.clusterConfigs.get(row);
+              label.setText(txt);
+              label.setToolTipText(String.format("%s - %s %s", config.name, config.queryEndpoint,
+                  config.configEndpoint));
 //          if (config.name.equals(settings.currentConnection)) {
 //            label.setIcon(Diff.GutterCheckBoxSelected);
 //          } else {
 //            label.setIcon(Diff.GutterCheckBox);
 //          }
-          label.setIcon(null);
-          break;
-        }
-        case 1: {
-          if (txt.toLowerCase().equals("true")) {
-            // label.setIcon(Diff.GutterCheckBoxSelected);
-            label.setIcon(YqlIcons.RADIO_SELECTED);
-          } else {
-            // label.setIcon(Diff.GutterCheckBox);
-            label.setIcon(YqlIcons.RADIO);
-          }
-          label.setText(null);
-          break;
-        }
-        case 2, 3: {
-          label.setText(txt);
-          label.setIcon(YqlIcons.STATUS_FAIL);
-          switch(txt) {
-            case VespaClusterChecker.STATUS_UP: {
-              label.setIcon(YqlIcons.STATUS_UP);
+              label.setIcon(null);
               break;
             }
-            case VespaClusterChecker.STATUS_DOWN: {
-              label.setIcon(YqlIcons.STATUS_DOWN);
+            case USE_COLUMN: {
+              if (txt.toLowerCase().equals("true")) {
+                // label.setIcon(Diff.GutterCheckBoxSelected);
+                label.setIcon(YqlIcons.RADIO_SELECTED);
+              } else {
+                // label.setIcon(Diff.GutterCheckBox);
+                label.setIcon(YqlIcons.RADIO);
+              }
+              label.setText(null);
               break;
             }
-            case VespaClusterChecker.STATUS_INITIALIZING: {
-              label.setIcon(General.InlineRefresh);
+            case QUERY_COLUMN, CONFIG_COLUMN: {
+              label.setText(txt);
+              label.setIcon(YqlIcons.STATUS_FAIL);
+              switch (txt.toUpperCase()) {
+                case "UP": {
+                  label.setIcon(YqlIcons.STATUS_UP);
+                  break;
+                }
+                case "DOWN": {
+                  label.setIcon(YqlIcons.STATUS_DOWN);
+                  break;
+                }
+                case "INITIALIZING": {
+                  label.setIcon(General.InlineRefresh);
+                  break;
+                }
+                default: {
+                }
+              }
+              label.setToolTipText("" + txt);
               break;
             }
             default: {
+              label.setText("" + value);
+              label.setIcon(null);
+              label.setToolTipText(null);
+              break;
             }
           }
-          label.setToolTipText("" + txt);
-          break;
-        }
-        default: {
-          label.setText("?");
-          label.setIcon(null);
-          label.setToolTipText(null);
-          break;
-        }
-      }
-      return label;
-    });
+          return label;
+        });
 
     clusterTableModel.addTableModelListener(event -> {
       // Only update columns when data changes as the order of events is HEADER then DATA.
@@ -270,8 +279,9 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
 //                "Delete connection!!!" + configTree.getLeadSelectionPath().getLastPathComponent());
 //          }
 //        }));
-    AnActionButton configAction =
-        AnActionButton.fromAction(new DumbAwareAction("Configuration", "", General.Settings) {
+
+    this.configActionBtn = new AnActionButton("Config", "Open configuration", General.Settings ) {
+      @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
         if (e == null) {
           return;
@@ -279,11 +289,35 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
         ShowSettingsUtil.getInstance().showSettingsDialog(project, "Vespa YQL");
         // "com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsConfigurable");
       }
-    });
-//    configAction.setShortcut(new CustomShortcutSet(
-//        KeyStroke.getKeyStroke("control ENTER")
-//    ));
-    decorator.addExtraAction(configAction);
+    };
+    decorator.addExtraAction(configActionBtn);
+
+    AnAction reloadAction = new AnAction("Refresh Vespa Cluster Status", "...", Actions.Refresh) {
+      public void actionPerformed(@NotNull AnActionEvent e) {
+        if (e == null) {
+          return;
+        }
+        ApplicationManager.getApplication().runReadAction(() -> {
+          log.debug("Update Vespa Cluster info...");
+          VespaClusterChecker.checkVespaClusters();
+        });
+      }
+    };
+    decorator.addExtraAction(reloadAction);
+    this.openLogsConfigBtn = new AnActionButton("Open Vespa Logs", "...", General.Warning) {
+      public void actionPerformed(@NotNull AnActionEvent e) {
+        if (e == null) {
+          return;
+        }
+        ApplicationManager.getApplication().runReadAction(() -> {
+          VespaLogsViewFactory.openLogs(project);
+        });
+      }
+    };
+    YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
+    openLogsConfigBtn.setEnabled(settings.doMonitorLogs);
+    decorator.addExtraAction(openLogsConfigBtn);
+
     JPanel treePanel = decorator.createPanel();
     treePanel.setBorder(Borders.empty());
 
@@ -331,6 +365,8 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
 
   @Override
   public void stateChanged(YqlAppSettingsState instance) {
+    YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
+    openLogsConfigBtn.setEnabled(settings.doMonitorLogs);
     this.refresh();
   }
 }

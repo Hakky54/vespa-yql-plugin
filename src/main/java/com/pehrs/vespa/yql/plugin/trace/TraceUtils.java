@@ -4,14 +4,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.jcef.JBCefApp;
 import com.pehrs.vespa.yql.plugin.YqlResult;
 import com.pehrs.vespa.yql.plugin.results.ZipkinBrowserPanel;
 import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsState;
+import com.pehrs.vespa.yql.plugin.util.BrowserUtils;
 import com.pehrs.vespa.yql.plugin.util.JsonUtils;
+import com.pehrs.vespa.yql.plugin.util.NotificationUtils;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -262,19 +263,12 @@ public class TraceUtils {
     if (JBCefApp.isSupported()) {
       zipkinPanel.loadURL(traceId);
     } else {
-//      if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-//        Desktop.getDesktop().browse(uri);
-//      }
       // Workaround is to run xdg-open ...
       try {
-        YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-        Process p = Runtime.getRuntime().exec(
-            String.format("%s %s", settings.browserScript, uri.toString()));
+        BrowserUtils.openBrowser(uri);
       } catch (IOException  ex) {
-        NotificationGroupManager.getInstance()
-            .getNotificationGroup("Vespa YQL")
-            .createNotification("Could not open browser: " + ex.getMessage(), NotificationType.ERROR)
-            .notify(project);
+        NotificationUtils.showNotification(project, NotificationType.ERROR,
+            "Could not open browser: " + ex.getMessage());
       }
     }
   }

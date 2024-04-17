@@ -1,6 +1,7 @@
 package com.pehrs.vespa.yql.plugin.dock;
 
 import com.pehrs.vespa.yql.plugin.VespaClusterChecker;
+import com.pehrs.vespa.yql.plugin.VespaClusterChecker.Status;
 import com.pehrs.vespa.yql.plugin.settings.VespaClusterConfig;
 import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsState;
 import java.util.List;
@@ -14,10 +15,19 @@ public class VespaClusterStatusTableModel extends AbstractTableModel implements 
 
   private final String[] COLUMNS = {
       "Cluster",
+      "App Name",
+      "Generation",
       "Use",
       "Query",
       "Config"
   };
+
+  public static final int CLUSTER_COLUMN = 0;
+  public static final int APP_NAME_COLUMN = 1;
+  public static final int GENERATION_COLUMN = 2;
+  public static final int USE_COLUMN = 3;
+  public static final int QUERY_COLUMN = 4;
+  public static final int CONFIG_COLUMN = 5;
 
   @Override
   public void vespaClusterStatusUpdated() {
@@ -60,14 +70,17 @@ public class VespaClusterStatusTableModel extends AbstractTableModel implements 
 
     VespaClusterConfig config = clusterConfigs.get(rowIndex);
 
-    Map<VespaClusterConfig, String> configStatus = VespaClusterChecker.getConfigEndpointStatus();
-    Map<VespaClusterConfig, String> queryStatus = VespaClusterChecker.getQueryEndpointStatus();
+    Map<VespaClusterConfig, Status> configStatus = VespaClusterChecker.getConfigEndpointStatus();
+    Map<VespaClusterConfig, Status> queryStatus = VespaClusterChecker.getQueryEndpointStatus();
+    Map<VespaClusterConfig, String> appName = VespaClusterChecker.getAppName();
     switch (columnIndex) {
       // case 0: return String.format("%s - %s", config.name, config.queryEndpoint);
-      case 0: return config.name;
-      case 1: return "" + config.name.equals(settings.currentConnection);
-      case 2: return queryStatus.getOrDefault(config,  VespaClusterChecker.STATUS_FAIL);
-      case 3: return configStatus.getOrDefault(config,  VespaClusterChecker.STATUS_FAIL);
+      case CLUSTER_COLUMN: return config.name;
+      case APP_NAME_COLUMN: return appName.getOrDefault(config, "-");
+      case GENERATION_COLUMN: return VespaClusterChecker.getAppGeneration(config).orElse("-");
+      case USE_COLUMN: return "" + config.name.equals(settings.currentConnection);
+      case QUERY_COLUMN: return "" + queryStatus.getOrDefault(config,  Status.FAIL);
+      case CONFIG_COLUMN: return "" + configStatus.getOrDefault(config,  Status.FAIL);
     }
     return null;
   }

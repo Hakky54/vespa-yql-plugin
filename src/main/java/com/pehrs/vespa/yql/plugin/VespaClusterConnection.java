@@ -229,4 +229,51 @@ public class VespaClusterConnection {
       throw new RuntimeException(e);
     }
   }
+
+  public static JsonNode jsonGet(String url) {
+    String res = get(url);
+    try {
+      return objectMapper.readTree(res);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static String get(String url) {
+    HttpGet request = new HttpGet(url);
+    return execute(request);
+  }
+
+  public static String execute(HttpRequestBase requestBase) {
+
+    YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
+
+    SocketConfig socketConfig = SocketConfig.custom()
+        .setSoTimeout(10_000)
+        .build();
+    HttpClientBuilder httpClientBuilder = HttpClients.custom()
+        .setDefaultSocketConfig(socketConfig);
+
+    URI uri = requestBase.getURI();
+    if (uri.getScheme().equals("https")) {
+      // NOTE: We cannot use the sslAllowAll for the config api, it typically requires the client cert to work
+      if (settings.sslAllowAll) {
+        log.warn("Allowing all server TLS certificates");
+        try {
+          allowAll(httpClientBuilder);
+        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+    try (CloseableHttpClient httpClient = httpClientBuilder.build();
+        CloseableHttpResponse response = httpClient.execute(requestBase)) {
+      String responseString = EntityUtils.toString(response.getEntity());
+      log.trace("HTTP Response Status: " + response.getStatusLine());
+      log.trace("HTTP Response: " + responseString);
+      return responseString;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

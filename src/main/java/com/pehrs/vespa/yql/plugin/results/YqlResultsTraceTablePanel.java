@@ -15,6 +15,7 @@ import com.pehrs.vespa.yql.plugin.YqlIcons;
 import com.pehrs.vespa.yql.plugin.YqlResult;
 import com.pehrs.vespa.yql.plugin.swing.TableColumnAdjuster;
 import com.pehrs.vespa.yql.plugin.trace.TraceUtils;
+import com.pehrs.vespa.yql.plugin.util.NotificationUtils;
 import java.awt.BorderLayout;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -93,10 +94,8 @@ public class YqlResultsTraceTablePanel extends JBPanel {
         try {
           String traceID = TraceUtils.uploadToZipkin();
 
-          NotificationGroupManager.getInstance()
-              .getNotificationGroup("Vespa YQL")
-              .createNotification("Zipkin trace " +traceID + " uploaded!", NotificationType.INFORMATION)
-              .notify(project);
+          String msg = "Zipkin trace " + traceID + " uploaded!";
+          NotificationUtils.showNotification(project, NotificationType.INFORMATION, msg);
 
           TraceUtils.openTrace(project, traceID, zipkinPanel);
 
@@ -104,15 +103,11 @@ public class YqlResultsTraceTablePanel extends JBPanel {
           tabs.setSelectedIndex(zipkinTabIndex);
 
         } catch (JsonProcessingException ex) {
-          NotificationGroupManager.getInstance()
-              .getNotificationGroup("Vespa YQL")
-              .createNotification("Zipkin Upload failed", NotificationType.ERROR)
-              .notify(project);
+          String msg = "Zipkin Upload failed";
+          NotificationUtils.showNotification(project, NotificationType.ERROR, msg);
         } catch (IOException | URISyntaxException ex) {
-          NotificationGroupManager.getInstance()
-              .getNotificationGroup("Vespa YQL")
-              .createNotification("Could not open default browser", NotificationType.ERROR)
-              .notify(project);
+          String msg = "Could not open default browser";
+          NotificationUtils.showNotification(project, NotificationType.ERROR, msg);
         }
 
       }

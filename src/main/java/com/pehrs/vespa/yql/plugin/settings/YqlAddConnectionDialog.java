@@ -1,17 +1,14 @@
 package com.pehrs.vespa.yql.plugin.settings;
 
-import com.intellij.notification.NotificationDisplayType;
-import com.intellij.notification.NotificationGroup;
-import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
+import com.pehrs.vespa.yql.plugin.util.NotificationUtils;
 import java.util.Optional;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -115,11 +112,7 @@ public class YqlAddConnectionDialog  extends DialogWrapper {
           )
       );
     } catch (IllegalArgumentException ex) {
-      NotificationGroup group = NotificationGroupManager.getInstance()
-          .getNotificationGroup("Vespa YQL");
-      group
-          .createNotification(ex.getMessage(), NotificationType.ERROR)
-          .notify(this.project);
+      NotificationUtils.showException(project, ex);
     }
     YqlAppSettingsStateListener.notifyListeners(settings);
 

@@ -72,12 +72,10 @@ public abstract class VespaAppUploader {
         new RuntimeException("Could not get current connection configuration!")
     );
 
-    // FIXME: From config?
-    String tenant = "default";
 
     String url = String.format("%s/application/v2/tenant/%s/prepareandactivate",
         config.configEndpoint,
-        tenant);
+        settings.tenant);
     HttpPost request = new HttpPost(url);
     request.addHeader("content-type", "application/zip");
     FileEntity entity = new FileEntity(zipFile);

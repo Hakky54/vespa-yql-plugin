@@ -1,4 +1,4 @@
-package com.pehrs.vespa.yql.plugin.graph;
+package com.pehrs.vespa.yql.plugin.serviceview;
 
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;

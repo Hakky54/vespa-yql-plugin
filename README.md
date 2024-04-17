@@ -19,11 +19,13 @@ IntelliJ plugin adding support for  [Vespa AI](https://github.com/vespa-engine/v
 * Render a tree view of any trace in the YQL response.
   * Optionally render a zipkin view of your trace.
   
-* Package, prepare and activate simple vespa applications.
+* Package, prepare and activate (Java based projects).
       
-* Support for TLS/SSL connections
+* Support for TLS/SSL connections to Vespa cluster and containers.
       
 * Simple visualization of services.xml files
+
+* Show Vespa cluster logs (mapped from docker containers) 
 
 ## Dependencies
 
@@ -64,6 +66,11 @@ file [from disk](https://www.jetbrains.com/help/idea/managing-plugins.html#insta
 
 ## Change-Notes
 
+  * [1.0.3] - Support for Vespa Java Apps
+    * Package, prepare and activate will call maven before packaging and uploading the application.
+    * The Vespa tool windows (except for the Side panel) will be hidden from start until they are needed.
+    * New tool window for Vespa Cluster logs
+      * Works with log files/dirs mapped from docker containers (`vespa.log` or `logarchive` directory).
   * [1.0.2] - TLS and simple upload
     * TLS support for connections (not tested on vespa-cloud as I do not have a vespa-cloud)
     * Right click on application dir and select "Package, Prepare and Activate"
@@ -72,6 +79,8 @@ file [from disk](https://www.jetbrains.com/help/idea/managing-plugins.html#insta
     * Simple visualization of service.xml files
       * Right-click on a services.xml file and select "Show Service Overview"
     * Show connection status in the Vespa dock
+    * Bugfix for Vespa Results toolWindow
+      * Responses will now turn up on first execution
   * [1.0.1] - Fix since-build for idea-version
   * [1.0.0] - First version
 
@@ -79,15 +88,30 @@ file [from disk](https://www.jetbrains.com/help/idea/managing-plugins.html#insta
 
 * Test TLS connectivity with vespa-cloud
   * We do not have access to a vespa-could to test this.
-* Application code support for prepare and activate
-  * Support Vespa Java Projects
-    * Trigger build before packaging the application
-    * Use the generated files in the ./target dir
-* When you run a yql request the first time after starting the IDE there will be no results shown.
-  * Workaround: just run the query again and results will show.
+* Add document-api support
+  * Support upload of Document PUT request from `.json` file using the `/document/v1/` api.
+  * Support for bulk uploads from `.json` files.
+* Add support for editing `services.xml` and `hosts.xml` with the help of a running cluster
+  * Discover nodes for different deployments/discovery methods
+    * docker
+    * kubernetes
+    * vespa-cloud
+    * DNS (SRV lookup)
+    * ETCD?
+    * SNMP?
+* Vespa developer cluster support (should be developed together with the docker node discovery feature)
+    * Add features to create and manage a cluster for development with docker/docker-compose.
+    * Support both single node and multi-node (secured?) clusters.
+* [bug] Logs chicken and egg problem
+    * When a multi-node vespa cluster is started the the `logarchive` directory does
+      not exist yet as that will only be created once an application has been deployed.
+      This can mess up the tailing of the logs for the plugin.
+    * We need to make the log handling more robust against file system issues like this...
+* Figure out how we can monitor the LogServer files remotely
+  * Test on k8s and vespa-cloud
 * Add more tests. The test coverage is VERY low atm.
 * Clean up and remove code that is no longer needed!
-* Improve the YQL ighlighting
+* Improve the YQL highlighting
 
 
 ## Setting up a Vespa Cluster for development
@@ -102,17 +126,21 @@ a single node vespa cluster with some books to search.
 
 1. Start vespa cluster
     ```shell
+    cd vespa-cluster/docker 
     # Start the vespa cluster/node
-    docker run --detach --name vespa --hostname vespa-container \
-        --publish 8080:8080 --publish 19071:19071 --publish 19050:19050 \
-        vespaengine/vespa:8
+    ./vespa-cluster-start.sh
         
     # Test that the config service is running
     curl -s http://localhost:19071/state/v1/health | jq .
         
     # Stop and remove
-    docker rm -f vespa
+    ./vespa-cluster-stop.sh
     ```
+   
+    The above start script will start a single node vespa cluster and map the log directory
+    to the [`vespa-cluster/docker/logs`](vespa-cluster/docker/logs) directory. 
+    You can monitor the vespa cluster logs with the plugin by setting this directory as the
+    `vespa-log-dir` in the plugin setting.
 
 1. Deploy the "books" application
 
@@ -127,7 +155,7 @@ a single node vespa cluster with some books to search.
     curl -s http://localhost:19071/state/v1/health | jq .
     ```
    
-    <img title="Services Overview" src="./assets/services-xml-single.png" alt="Services Overview" height="300"/>
+    <img title="Services Overview" src="./assets/services-xml-single.png" alt="Services Overview" height="200"/>
 
 1. Add some documents
    ```shell
@@ -163,8 +191,8 @@ All files needed are in the [`vespa-cluster`](vespa-cluster) directory:
 1. Start cluster nodes with docker-compose:
     ```shell
     cd vespa-cluster/docker-compose
-    # Run detached
-    docker-compose up -d
+    # Start the vespa cluster/node
+    ./vespa-cluster-start.sh
    
     # Try the secured config endpoint:
     curl  -s \
@@ -174,10 +202,13 @@ All files needed are in the [`vespa-cluster`](vespa-cluster) directory:
         https://localhost:19071/state/v1/health | jq .
        
     # To stop just
-    docker-compose stop
-    # or (-v will remove the volumes and data)
-    docker-compose down -v
+    ./vespa-cluster-stop.sh
+   
     ```
+    The above start script will start a single node vespa cluster and map the log directory
+    to the [`vespa-cluster/docker-copmpose/logs`](vespa-cluster/docker/logs) directory. 
+    You can monitor the vespa cluster logs with the plugin by setting this directory as the
+    `vespa-log-dir` in the plugin setting.
 
    Docker-compose will create a cluster with the following nodes:
 
@@ -199,6 +230,13 @@ All files needed are in the [`vespa-cluster`](vespa-cluster) directory:
     --cert $(pwd)/pki/vespa/host.pem \
     --cacert $(pwd)/pki/vespa/ca-vespa.pem \
     https://localhost:19071/application/v2/tenant/default/prepareandactivate
+    
+    # Make sure the application is up by probing the query port 
+    curl  -s \
+      --key $(pwd)/tls/host.key \
+      --cert $(pwd)/tls/host.pem \
+      --cacert $(pwd)/tls/ca-vespa.pem \
+      https://localhost:8443/state/v1/health | jq .
     ```
    <img title="Services Overview" src="./assets/services-xml.png" alt="Services Overview" height="300"/>
 

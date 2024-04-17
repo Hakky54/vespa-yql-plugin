@@ -4,19 +4,13 @@ import com.intellij.icons.AllIcons.Actions;
 import com.intellij.icons.AllIcons.General;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
-import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.extensions.PluginId;
-import com.intellij.openapi.fileChooser.FileChooser;
-import com.intellij.openapi.fileChooser.FileChooserDialog;
-import com.intellij.openapi.fileChooser.FileChooserFactory;
-import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.AnActionButton;
 import com.intellij.ui.JBColor;
@@ -29,45 +23,31 @@ import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.ui.components.JBTextField;
-import com.intellij.ui.components.panels.HorizontalBox;
-import com.intellij.util.Function;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI.Borders;
-import com.jetbrains.JBRFileDialog;
 import com.pehrs.vespa.yql.plugin.YQL;
+import com.pehrs.vespa.yql.plugin.util.NotificationUtils;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.swing.AbstractListModel;
-import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.plaf.ComponentUI;
-import javax.swing.plaf.FileChooserUI;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -81,7 +61,11 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
 
   private final JPanel myMainPanel;
   private final JBTextField myZipkinEndpointText;
-  private final JBTextField browserScriptText;
+  private final JBTextField mavenParametersText;
+  private final JBTextField tenantText;
+
+  private final JBCheckBox logsCheckBox;
+  private final JBTextField logsPathText;
 
   private final JBLabel sslUseClientCertLabel;
   private final JBCheckBox sslUseClientCertCheckBox;
@@ -121,10 +105,8 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
     sslAllowAllCheckbox.setSelected(false);
     sslAllowAllCheckbox.setToolTipText(
         "[WARNING] This will trust ANY https connection (even self-signed)!!!");
-    sslAllowAllCheckbox.addChangeListener(e -> allowAllChanged());
     sslAllowAllCheckbox.addActionListener(event -> {
       log.warn("event: " + event);
-
       if (this.sslAllowAllCheckbox.isSelected()) {
         log.warn(
             "Security WARNING: Trusting all connections will trust ANY https connection (even self-signed)!!!");
@@ -133,12 +115,8 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
             "<html><h1>WARNING!</h1><p>Trusting all query connections will trust ANY https connection (even self-signed)!!!</p></html>",
             "Security WARNING");
 
-        NotificationGroupManager.getInstance()
-            .getNotificationGroup("Vespa YQL")
-            .createNotification(
-                "Security WARNING: Trusting all connections will trust ANY https connection (even self-signed)!!!",
-                NotificationType.WARNING)
-            .notify(this.project);
+        NotificationUtils.showNotification(project, NotificationType.WARNING,
+            "Security WARNING: Trusting all connections will trust ANY https connection (even self-signed)!!!");
       }
     });
 
@@ -165,53 +143,59 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
     sslUseClientCertCheckBox.setToolTipText("");
     sslUseClientCertCheckBox.addChangeListener(e -> useClientCertChanged());
 
+    Dimension maxFieldDim = new Dimension(200, 12);
+
     sslCaCertLabel = new JBLabel("CA certificate");
     sslCaCertLabel.setEnabled(false);
-    sslCaCertText = new JBTextField();
+    sslCaCertText = new JBTextField(10);
+    sslCaCertText.setMaximumSize(maxFieldDim);
     sslCaCertText.setEnabled(false);
     sslCaCertText.addKeyListener(new TextFieldAdapter(this.sslCaCertText,
         (vespaClusterConfig, value) -> {
           vespaClusterConfig.sslCaCert = value;
         }));
 
-    JBPanel caCertPanel = new JBPanel(new BorderLayout());
-    caCertPanel.add(sslCaCertText, BorderLayout.CENTER);
-    JButton caCertFileBtn = new JButton("...");
-    caCertFileBtn.addActionListener(event -> {
-      String path = this.lastPath;
-      if (path == null) {
-        Project[] projects = ProjectManager.getInstance().getOpenProjects();
-        if(projects != null && projects.length > 0) {
-          path = projects[0].getBasePath();
-        }
-      }
-      JFileChooser fc = new JFileChooser(path);
-      if (fc.showDialog(YqlAppSettingsComponent.this.myMainPanel, "Select")
-          == JFileChooser.APPROVE_OPTION) {
-        File selectedFile = fc.getSelectedFile();
-        this.lastPath = selectedFile.toPath().getParent().toFile().getAbsolutePath();
-        sslCaCertText.setText(selectedFile.getAbsolutePath());
-      }
-    });
-    caCertPanel.add(caCertFileBtn, BorderLayout.EAST);
+    JBPanel caCertPanel = createFileChooserPanel(this.sslCaCertText,
+        JFileChooser.FILES_ONLY,
+        (path) -> {
+          if (connectionList.getSelectedValue() instanceof VespaClusterConfig config) {
+            config.sslCaCert = path;
+          }
+        });
 
     sslClientCertLabel = new JBLabel("Client certificate");
     sslClientCertLabel.setEnabled(false);
-    sslClientCertText = new JBTextField();
+    sslClientCertText = new JBTextField(10);
+    sslClientCertText.setMaximumSize(maxFieldDim);
     sslClientCertText.setEnabled(false);
     sslClientCertText.addKeyListener(new TextFieldAdapter(this.sslClientCertText,
         (vespaClusterConfig, value) -> {
           vespaClusterConfig.sslClientCert = value;
         }));
+    JBPanel sslClientCertPanel = createFileChooserPanel(this.sslClientCertText,
+        JFileChooser.FILES_ONLY,
+        (path) -> {
+          if (connectionList.getSelectedValue() instanceof VespaClusterConfig config) {
+            config.sslClientCert = path;
+          }
+        });
 
     sslClientKeyLabel = new JBLabel("Client key");
     sslClientKeyLabel.setEnabled(false);
-    sslClientKeyText = new JBTextField();
+    sslClientKeyText = new JBTextField(10);
+    sslClientKeyText.setMaximumSize(maxFieldDim);
     sslClientKeyText.setEnabled(false);
     sslClientKeyText.addKeyListener(new TextFieldAdapter(this.sslClientKeyText,
         (vespaClusterConfig, value) -> {
           vespaClusterConfig.sslClientKey = value;
         }));
+    JBPanel sslClientKeyPanel = createFileChooserPanel(this.sslClientKeyText,
+        JFileChooser.FILES_ONLY,
+        (path) -> {
+          if (connectionList.getSelectedValue() instanceof VespaClusterConfig config) {
+            config.sslClientKey = path;
+          }
+        });
 
     FormBuilder builder = FormBuilder.createFormBuilder()
         .addLabeledComponent(new JBLabel("Name: "), nameField)
@@ -221,8 +205,8 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
         .addComponent(new JBLabel("SSL/TLS"))
         .addLabeledComponent(this.sslUseClientCertLabel, sslUseClientCertCheckBox, false)
         .addLabeledComponent(this.sslCaCertLabel, caCertPanel, false)
-        .addLabeledComponent(this.sslClientCertLabel, sslClientCertText, false)
-        .addLabeledComponent(this.sslClientKeyLabel, sslClientKeyText, false);
+        .addLabeledComponent(this.sslClientCertLabel, sslClientCertPanel, false)
+        .addLabeledComponent(this.sslClientKeyLabel, sslClientKeyPanel, false);
     // .addComponentFillVertically(new JPanel(), 0)
     JPanel configPanel = new JPanel(new BorderLayout());
     JPanel formPanel = builder.getPanel();
@@ -257,9 +241,6 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
               return;
             }
 
-//            DefaultMutableTreeNode selected =
-//                (DefaultMutableTreeNode) configTree.getLeadSelectionPath().getLastPathComponent();
-//            VespaClusterConfig config = (VespaClusterConfig) selected.getUserObject();
             VespaClusterConfig config = (VespaClusterConfig) connectionList.getSelectedValue();
 
             if (config != null) {
@@ -271,18 +252,7 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
             }
           }
         }));
-//    if (!editable) {
-//      decorator.addExtraAction(AnActionButton.fromAction(new DumbAwareAction("Configuration", "",
-//          General.Settings) {
-//        public void actionPerformed(@NotNull AnActionEvent e) {
-//          if (e == null) {
-//            return;
-//          }
-//          ShowSettingsUtil.getInstance().showSettingsDialog(project, "Vespa YQL");
-//          // "com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsConfigurable");
-//        }
-//      }));
-//    }
+
     JPanel panel = decorator.createPanel();
     panel.setBorder(Borders.empty());
 
@@ -296,7 +266,20 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
 
     myZipkinEndpointText = new JBTextField();
 
-    browserScriptText = new JBTextField();
+    mavenParametersText = new JBTextField();
+    tenantText = new JBTextField();
+
+    logsPathText = new JBTextField(10);
+    JBPanel logsPathTextPanel = createFileChooserPanel(this.logsPathText,
+        JFileChooser.FILES_AND_DIRECTORIES,
+        (path) -> {
+          logsPathText.setText(path);
+        });
+
+    logsCheckBox = new JBCheckBox(null);
+    logsCheckBox.addActionListener((event) -> {
+      logsPathText.setEnabled(logsCheckBox.isSelected());
+    });
 
     refresh();
 
@@ -313,8 +296,12 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
 
     myMainPanel = FormBuilder.createFormBuilder()
         .addComponent(verLabel)
-        .addLabeledComponent(new JBLabel("Zipkin endpoint: "), myZipkinEndpointText, 1, false)
-        .addLabeledComponent(new JBLabel("Browser script: "), browserScriptText, 1, false)
+        .addLabeledComponent(new JBLabel("Vespa tenant:"), tenantText, 1, false)
+        .addLabeledComponent(new JBLabel("Maven build parameters:"), mavenParametersText, 1, false)
+        .addLabeledComponent(new JBLabel("Zipkin endpoint:"), myZipkinEndpointText, 1, false)
+        .addLabeledComponent(new JBLabel("Monitor Logs:"), logsCheckBox, 1, false)
+        // .addLabeledComponent(new JBLabel("Logs Path:"), logsPathText, 1, false)
+        .addLabeledComponent(new JBLabel("Logs Path:"), logsPathTextPanel, 1, false)
         .addSeparator()
         .addComponent(new JBLabel("SSL/TLS"))
         .addLabeledComponent(new JBLabel("Trust all query TLS/SSL connections"),
@@ -415,93 +402,6 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
     return connList;
   }
 
-//  private void createTree() {
-//    this.configRoot = new DefaultMutableTreeNode();
-//    configRoot.setUserObject("Vespa Clusters");
-//    this.treeModel = new DefaultTreeModel(configRoot);
-//    this.configTree = new DnDAwareTree(treeModel);
-//
-//    JBLabel label = new JBLabel();
-//
-////    this.configTree.addTreeExpansionListener(new TreeExpansionListener() {
-////      @Override
-////      public void treeExpanded(TreeExpansionEvent event) {
-////        TreePath path = event.getPath();
-////        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-////        Object userObj = node.getUserObject();
-////        if(userObj instanceof VespaClusterConfig config) {
-////          // This is a double click :-)
-////          YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-////          settings.currentConnection = config.name;
-////          YqlAppSettingsStateListener.notifyListeners(settings);
-////        }
-////      }
-////
-////      @Override
-////      public void treeCollapsed(TreeExpansionEvent event) {
-////        // Ignore for now...
-////      }
-////    });
-//
-//    this.configTree.addMouseListener(new MouseAdapter() {
-//      @Override
-//      public void mouseClicked(MouseEvent e) {
-//        if (e.getClickCount() >= 2) {
-//          TreePath path = configTree.getLeadSelectionPath();
-//          DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-//          Object userObj = node.getUserObject();
-//          if (userObj instanceof VespaClusterConfig config) {
-//            // This is a double click :-)
-//            YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-//            settings.currentConnection = config.name;
-//            YqlAppSettingsStateListener.notifyListeners(settings);
-//          }
-//          super.mouseClicked(e);
-//        }
-//        if (e.getClickCount() == 1) {
-//          // Selected
-//          TreePath path = configTree.getLeadSelectionPath();
-//          DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-//          Object userObj = node.getUserObject();
-//          if (userObj instanceof VespaClusterConfig config) {
-//            nameField.setText(config.name);
-//            queryEndpointField.setText(config.queryEndpoint);
-//            configEndpointField.setText(config.configEndpoint);
-//            sslUseClientCertCheckBox.setSelected(config.sslUseClientCert);
-//            sslCaCertText.setText(config.sslCaCert);
-//            sslClientCertText.setText(config.sslClientCert);
-//            sslClientKeyLabel.setText(config.sslClientKey);
-//            useClientCertChanged();
-//          }
-//        }
-//      }
-//    });
-//
-//    this.configTree.setCellRenderer(new TreeCellRenderer() {
-//      @Override
-//      public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected,
-//          boolean expanded, boolean leaf, int row, boolean hasFocus) {
-//        DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-//        Object uo = node.getUserObject();
-//        if (uo instanceof VespaClusterConfig config) {
-//          label.setText(config.name);
-//          YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-//          if (config.name.equals(settings.currentConnection)) {
-//            label.setIcon(Actions.Checked);
-//          } else {
-//            // label.setIcon(YqlIcons.FILE);
-//            label.setIcon(null);
-//          }
-//        } else {
-//          label.setText("" + uo);
-//          label.setIcon(null);
-//        }
-//
-//        return label;
-//      }
-//    });
-//  }
-
   public JPanel getPanel() {
     return myMainPanel;
   }
@@ -547,6 +447,7 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
 //          DefaultMutableTreeNode defNode = (DefaultMutableTreeNode) node;
 //          return (VespaClusterConfig) defNode.getUserObject();
 //        }).collect(Collectors.toList());
+
     return clusterConfigs;
   }
 
@@ -559,12 +460,40 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
     myZipkinEndpointText.setText(newText);
   }
 
-  public String getBrowserScript() {
-    return browserScriptText.getText();
+  @NotNull
+  public String getMavenParameters() {
+    return mavenParametersText.getText();
   }
 
-  public void setBrowserScript(String newValue) {
-    browserScriptText.setText(newValue);
+  public void setMavenParameters(@NotNull String newText) {
+    mavenParametersText.setText(newText);
+  }
+
+  @NotNull
+  public String getLogsPath() {
+    return logsPathText.getText();
+  }
+
+  public void setLogsPath(@NotNull String newText) {
+    logsPathText.setText(newText);
+  }
+
+  @NotNull
+  public boolean getMonitorLogs() {
+    return this.logsCheckBox.isSelected();
+  }
+
+  public void setMonitorLogs(@NotNull Boolean checked) {
+    this.logsCheckBox.setSelected(checked);
+  }
+
+  @NotNull
+  public String getTenant() {
+    return tenantText.getText();
+  }
+
+  public void setTenant(@NotNull String newText) {
+    tenantText.setText(newText);
   }
 
   public boolean getSslAllowAll() {
@@ -577,58 +506,19 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
     this.connectionListModel.fireContentsChanged();
   }
 
-//  public void removeClusterConfig(String queryEndpoint) {
-//    Optional<MutableTreeNode> found = StreamSupport.stream(
-//            Spliterators.spliteratorUnknownSize(this.configRoot.children().asIterator(),
-//                Spliterator.ORDERED),
-//            false)
-//        .filter(node -> {
-//          DefaultMutableTreeNode defNode = (DefaultMutableTreeNode) node;
-//          VespaClusterConfig config = (VespaClusterConfig) defNode.getUserObject();
-//          return queryEndpoint.equals(config.configEndpoint);
-//        })
-//        .map(n -> (MutableTreeNode) n)
-//        .findFirst();
-//    found.ifPresent(node -> this.configRoot.remove(node));
-//  }
-
   public void refresh() {
     YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
     setZipkinEndpoint(settings.zipkinEndpoint);
-    setBrowserScript(settings.browserScript);
+    setMavenParameters(settings.mavenParameters);
+    setLogsPath(settings.logsPath);
+    setMonitorLogs(settings.doMonitorLogs);
+    this.logsPathText.setEnabled(settings.doMonitorLogs);
+    setTenant(settings.tenant);
     sslAllowAllCheckbox.setSelected(settings.sslAllowAll);
-    allowAllChanged();
 
     setVespaClusterConfigs(settings.clusterConfigs);
-
-//    sslUseClientCertCheckBox.setSelected(settings.sslUseClientCert && !settings.sslAllowAll);
-//    useClientCertChanged();
-//    sslCaCertText.setText(settings.sslCaCert);
-//    sslClientCertText.setText(settings.sslClientCert);
-//    sslClientKeyText.setText(settings.sslClientKey);
-
-//    sslUseClientCertLabel.setEnabled(!settings.sslAllowAll);
-//    sslUseClientCertCheckBox.setEnabled(!settings.sslAllowAll);
-//
-//    sslCaCertLabel.setEnabled(settings.sslUseClientCert && !settings.sslAllowAll);
-//    sslCaCertText.setEnabled(settings.sslUseClientCert && !settings.sslAllowAll);
-//
-//    sslClientCertLabel.setEnabled(settings.sslUseClientCert && !settings.sslAllowAll);
-//    sslClientCertText.setEnabled(settings.sslUseClientCert && !settings.sslAllowAll);
-//
-//    sslClientKeyLabel.setEnabled(settings.sslUseClientCert && !settings.sslAllowAll);
-//    sslClientKeyText.setEnabled(settings.sslUseClientCert && !settings.sslAllowAll);
   }
 
-  private void allowAllChanged() {
-//    boolean sslAllowAll = this.sslAllowAllCheckbox.isSelected();
-//    sslUseClientCertLabel.setEnabled(!sslAllowAll);
-//    if (sslAllowAll) {
-//      sslUseClientCertCheckBox.setSelected(false);
-//    }
-//    sslUseClientCertCheckBox.setEnabled(!sslAllowAll);
-
-  }
 
 
   private void useClientCertChanged() {
@@ -654,5 +544,34 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
   @Override
   public void stateChanged(YqlAppSettingsState instance) {
     refresh();
+  }
+
+  private JBPanel createFileChooserPanel(JBTextField textField,
+      int mode,
+      Consumer<String> postSelectFn) {
+    JBPanel panel = new JBPanel(new BorderLayout());
+    panel.add(textField, BorderLayout.CENTER);
+    JButton selectFileBtn = new JButton("...");
+    selectFileBtn.addActionListener(event -> {
+      String path = this.lastPath;
+      if (path == null) {
+        Project[] projects = ProjectManager.getInstance().getOpenProjects();
+        if (projects != null && projects.length > 0) {
+          path = projects[0].getBasePath();
+        }
+      }
+      JFileChooser fc = new JFileChooser(path);
+      fc.setFileSelectionMode(mode);
+      if (fc.showDialog(this.myMainPanel, "Select Dir/File")
+          == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fc.getSelectedFile();
+        this.lastPath = selectedFile.toPath().getParent().toFile().getAbsolutePath();
+        String absPath = selectedFile.getAbsolutePath();
+        textField.setText(selectedFile.getAbsolutePath());
+        postSelectFn.accept(absPath);
+      }
+    });
+    panel.add(selectFileBtn, BorderLayout.EAST);
+    return panel;
   }
 }

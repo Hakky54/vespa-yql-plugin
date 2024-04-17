@@ -18,25 +18,35 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI.Borders;
 import com.pehrs.vespa.yql.plugin.YqlResult;
 import com.pehrs.vespa.yql.plugin.swing.TableColumnAdjuster;
+import com.pehrs.vespa.yql.plugin.util.NotificationUtils;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.PrintWriter;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class YqlResultsTablePanel extends JBPanel {
 
   private final Project project;
+  @Getter
   private YqlResultsTableModel tableModel;
+  private AnActionButton exportAsCsvBtn;
+  private AnActionButton exportAsTsvBtn;
 
   public YqlResultsTablePanel(Project project) {
     super(new BorderLayout());
     this.project = project;
     super.setBorder(Borders.empty());
     createComponents();
+  }
+
+  public void enableExport(boolean enable) {
+    this.exportAsCsvBtn.setEnabled(enable);
+    this.exportAsTsvBtn.setEnabled(enable);
   }
 
   protected void notifyModel() {
@@ -67,60 +77,69 @@ public class YqlResultsTablePanel extends JBPanel {
             .initPosition()
             .setToolbarPosition(ActionToolbarPosition.TOP);
 
-    decorator.addExtraAction(
-        AnActionButton.fromAction(
-            new DumbAwareAction("Export as CSV", "Export table as CSV", Actions.Download) {
-              public void actionPerformed(@NotNull AnActionEvent e) {
-                if (e == null) {
-                  return;
-                }
-                FileSaverDescriptor descriptor = new FileSaverDescriptor(
-                    "Save CSV", "Save Result to CSV file", "csv"
-                );
-                @NotNull FileSaverDialog dialog = FileChooserFactory.getInstance()
-                    .createSaveFileDialog(descriptor, project);
+    this.exportAsCsvBtn = new AnActionButton("Export as CSV", Actions.Download) {
+      @Override
+      public void actionPerformed(@NotNull AnActionEvent e) {
+        if (e == null) {
+          return;
+        }
+        FileSaverDescriptor descriptor = new FileSaverDescriptor(
+            "Save CSV", "Save Result to CSV file", "csv"
+        );
+        @NotNull FileSaverDialog dialog = FileChooserFactory.getInstance()
+            .createSaveFileDialog(descriptor, project);
 
-                @Nullable VirtualFileWrapper res = dialog.save(project.getWorkspaceFile(), "vespa-yql-result");
-                if(res != null) {
-                  File file = res.getFile();
-                  try(PrintWriter out = new PrintWriter(file)) {
-                    out.print(tableModel.toCsv());
-                    out.flush();
-                  } catch (Exception ex) {
-                    NotificationGroupManager.getInstance()
-                        .getNotificationGroup("Vespa YQL")
-                        .createNotification(ex.getMessage(), NotificationType.ERROR)
-                        .notify(project);
-                  }
-                }
-              }
-            }));
+        @Nullable VirtualFileWrapper res = dialog.save(project.getWorkspaceFile(), "vespa-yql-result");
+        if(res != null) {
+          File file = res.getFile();
+          try(PrintWriter out = new PrintWriter(file)) {
+            out.print(tableModel.toCsv());
+            out.flush();
+          } catch (Exception ex) {
+            NotificationUtils.showException(project, ex);
+          }
+        }
+      }
+    };
+    decorator.addExtraAction(exportAsCsvBtn);
 
-    decorator.addExtraAction(
-        AnActionButton.fromAction(
-            new DumbAwareAction("Export as TSV", "Export table as TSV", Actions.Download) {
-              public void actionPerformed(@NotNull AnActionEvent e) {
-                FileSaverDescriptor descriptor = new FileSaverDescriptor(
-                    "Save CSV", "Save Result to TSV file", "tsv"
-                );
-                @NotNull FileSaverDialog dialog = FileChooserFactory.getInstance()
-                    .createSaveFileDialog(descriptor, project);
+//    decorator.addExtraAction(
+//        AnActionButton.fromAction(
+//            new DumbAwareAction("Export as CSV", "Export table as CSV", Actions.Download) {
+//              public void actionPerformed(@NotNull AnActionEvent e) {
+//              }
+//            }));
 
-                @Nullable VirtualFileWrapper res = dialog.save(project.getWorkspaceFile(), "vespa-yql-result");
-                if(res != null) {
-                  File file = res.getFile();
-                  try(PrintWriter out = new PrintWriter(file)) {
-                    out.print(tableModel.toTsv());
-                    out.flush();
-                  } catch (Exception ex) {
-                    NotificationGroupManager.getInstance()
-                        .getNotificationGroup("Vespa YQL")
-                        .createNotification(ex.getMessage(), NotificationType.ERROR)
-                        .notify(project);
-                  }
-                }
-              }
-            }));
+    this.exportAsTsvBtn = new AnActionButton("Export as CSV", Actions.Download) {
+      @Override
+      public void actionPerformed(@NotNull AnActionEvent e) {
+        FileSaverDescriptor descriptor = new FileSaverDescriptor(
+            "Save CSV", "Save Result to TSV file", "tsv"
+        );
+        @NotNull FileSaverDialog dialog = FileChooserFactory.getInstance()
+            .createSaveFileDialog(descriptor, project);
+
+        @Nullable VirtualFileWrapper res = dialog.save(project.getWorkspaceFile(), "vespa-yql-result");
+        if(res != null) {
+          File file = res.getFile();
+          try(PrintWriter out = new PrintWriter(file)) {
+            out.print(tableModel.toTsv());
+            out.flush();
+          } catch (Exception ex) {
+            NotificationUtils.showNotification(project, NotificationType.ERROR, ex.getMessage());
+          }
+        }
+      }
+    };
+
+//    decorator.addExtraAction(
+//        AnActionButton.fromAction(
+//            new DumbAwareAction("Export as TSV", "Export table as TSV", Actions.Download) {
+//              public void actionPerformed(@NotNull AnActionEvent e) {
+//
+//              }
+//            }));
+    decorator.addExtraAction(this.exportAsTsvBtn);
 
     JPanel panel = decorator.createPanel();
     panel.setBorder(Borders.empty());

@@ -19,6 +19,7 @@ services:
     volumes:
       - vespa-config-0-data:/opt/vespa/var
       - ./tls:/var/tls/
+      - ./logs:/opt/vespa/logs/vespa/
     ports:
       - 19071:19071 # Config port
       - 19050:19050 # Status page port

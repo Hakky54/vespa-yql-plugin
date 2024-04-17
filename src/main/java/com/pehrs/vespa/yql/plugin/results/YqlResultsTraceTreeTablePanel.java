@@ -1,10 +1,8 @@
 package com.pehrs.vespa.yql.plugin.results;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Debugger;
 import com.intellij.icons.AllIcons.Nodes;
-import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -24,16 +22,15 @@ import com.pehrs.vespa.yql.plugin.trace.TraceUtils;
 import com.pehrs.vespa.yql.plugin.trace.YqlTraceMessage;
 import com.pehrs.vespa.yql.plugin.trace.YqlTraceNodeBase;
 import com.pehrs.vespa.yql.plugin.trace.YqlTraceThread;
+import com.pehrs.vespa.yql.plugin.util.NotificationUtils;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.JTree;
 import javax.swing.event.TreeModelEvent;
-import javax.swing.tree.TreeCellRenderer;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 public class YqlResultsTraceTreeTablePanel extends JBPanel {
@@ -45,6 +42,9 @@ public class YqlResultsTraceTreeTablePanel extends JBPanel {
   private final ZipkinBrowserPanel zipkinPanel;
 
   private JTabbedPane tabs;
+
+  @Getter
+  private YqlResultsTraceTreeTableModel model;
 
   public YqlResultsTraceTreeTablePanel(Project project, JTabbedPane tabs, int traceTabIndex, int zipkinTabIndex, ZipkinBrowserPanel zipkinPanel) {
     super(new BorderLayout());
@@ -58,7 +58,7 @@ public class YqlResultsTraceTreeTablePanel extends JBPanel {
   }
 
   private void createComponents() {
-    YqlResultsTraceTreeTableModel model = new YqlResultsTraceTreeTableModel();
+    this.model = new YqlResultsTraceTreeTableModel();
     YqlResult.addResultListener(model);
 
     TreeTable treeTable = new TreeTable(model);
@@ -112,10 +112,8 @@ public class YqlResultsTraceTreeTablePanel extends JBPanel {
         try {
           String traceID = TraceUtils.uploadToZipkin();
 
-          NotificationGroupManager.getInstance()
-              .getNotificationGroup("Vespa YQL")
-              .createNotification("Zipkin trace " +traceID + " uploaded!", NotificationType.INFORMATION)
-              .notify(project);
+          String msg = "Zipkin trace " +traceID + " uploaded!";
+          NotificationUtils.showNotification(project, NotificationType.INFORMATION, msg);
 
           TraceUtils.openTrace(project, traceID, zipkinPanel);
 
@@ -123,16 +121,13 @@ public class YqlResultsTraceTreeTablePanel extends JBPanel {
           tabs.setSelectedIndex(zipkinTabIndex);
 
         } catch (JsonProcessingException ex) {
-          NotificationGroupManager.getInstance()
-              .getNotificationGroup("Vespa YQL")
-              .createNotification("Zipkin Upload failed", NotificationType.ERROR)
-              .notify(project);
+          String msg = "Zipkin Upload failed";
+          NotificationUtils.showNotification(project, NotificationType.ERROR, msg);
         } catch (IOException | URISyntaxException ex) {
-          NotificationGroupManager.getInstance()
-              .getNotificationGroup("Vespa YQL")
-              .createNotification("Could not open default browser", NotificationType.ERROR)
-              .notify(project);
-        }      }
+          String msg = "Could not open default browser";
+          NotificationUtils.showNotification(project, NotificationType.ERROR, msg);
+        }
+      }
     });
     JPanel panel = decorator.createPanel();
     panel.setBorder(Borders.empty());

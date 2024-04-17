@@ -1,22 +1,20 @@
 package com.pehrs.vespa.yql.plugin.actions;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode;
-import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.LargeFileWriteRequestor;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
-import com.pehrs.vespa.yql.plugin.graph.VespaServicesDockFactory;
+import com.pehrs.vespa.yql.plugin.serviceview.VespaServicesDockFactory;
+import com.pehrs.vespa.yql.plugin.util.IdeProjectUtils;
+import com.pehrs.vespa.yql.plugin.util.NotificationUtils;
 import com.pehrs.vespa.yql.plugin.xml.VespaServicesXml;
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -28,12 +26,18 @@ public class YqlServiceXmlAction extends AnAction implements LargeFileWriteReque
 
   @Override
   public void update(AnActionEvent actionEvent) {
+    boolean enabled = false;
+    if(actionEvent.getProject() != null) {
+      enabled=IdeProjectUtils.isVespaJavaAppProject(actionEvent.getProject());
+    }
     @Nullable VirtualFile virtualFile = actionEvent.getData(
         CommonDataKeys.VIRTUAL_FILE);
-    actionEvent.getPresentation().setEnabledAndVisible(
-        virtualFile != null &&
-            virtualFile.getName().equals("services.xml")
-    );
+    if (virtualFile != null) {
+      if(virtualFile.getName().equals("services.xml")) {
+        enabled = true;
+      }
+    }
+    actionEvent.getPresentation().setEnabledAndVisible(enabled);
   }
 
   // override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
@@ -46,45 +50,41 @@ public class YqlServiceXmlAction extends AnAction implements LargeFileWriteReque
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent event) {
+    @Nullable String servicesXmlPath = null;
     @Nullable VirtualFile virtualFile = event.getData(
         CommonDataKeys.VIRTUAL_FILE);
-    log.info("Services-XML: " + virtualFile);
-    if (virtualFile == null) {
-      return;
+    if(virtualFile != null && virtualFile.getName().equals("services.xml")) {
+      servicesXmlPath = virtualFile.getCanonicalPath();
+    } else {
+      // Try to get the services.xml from the project instead
+      Optional<VirtualFile> serviceXmlVf = IdeProjectUtils.getServicesXmlFile(
+          IdeProjectUtils.getProjectRootDir(event.getProject()));
+      if(serviceXmlVf.isEmpty()) {
+        String msg = "Could not find a Vespa service.xml in project";
+        log.warn(msg);
+        NotificationUtils.showNotification(event.getProject(), NotificationType.WARNING, msg);
+        return;
+      }
+      servicesXmlPath = serviceXmlVf.get().getCanonicalPath();
     }
-
-    @Nullable String servicesXmlPath = virtualFile.getCanonicalPath();
-
     File servicesXmlFile = new File(servicesXmlPath);
     try {
-      ToolWindow window = ToolWindowManager.getInstance(
-          event.getProject()).getToolWindow("services.xml - Services/Node Overview");
-      if (window != null) {
-        window.activate(() -> {
-          window.show(() -> {
-            try {
-              VespaServicesXml services = xmlMapper.readValue(servicesXmlFile,
-                  VespaServicesXml.class);
-              VespaServicesDockFactory.setServicesXml(services);
-            } catch (IOException ex) {
-              log.error("Could not read/parse " + virtualFile.getCanonicalPath(), ex);
-              String errMsg = ex.getMessage();
-              NotificationGroupManager.getInstance()
-                  .getNotificationGroup("Vespa YQL")
-                  .createNotification(errMsg, NotificationType.ERROR)
-                  .notify(event.getProject());
-              throw new RuntimeException(ex);
-            }
-          });
-        });
+      try {
+        VespaServicesXml services = xmlMapper.readValue(servicesXmlFile,
+            VespaServicesXml.class);
+        VespaServicesDockFactory.setServicesXml(services);
+      } catch (IOException ex) {
+        log.error("Could not read/parse " + virtualFile.getCanonicalPath(), ex);
+        String errMsg = ex.getMessage();
+        NotificationUtils.showNotification(event.getProject(), NotificationType.ERROR,
+            errMsg);
+        throw new RuntimeException(ex);
       }
+      VespaServicesDockFactory.openServiceXml(event.getProject());
     } catch (Exception ex) {
       log.error("Could not read/parse " + virtualFile.getCanonicalPath(), ex);
       String errMsg = ex.getMessage();
-      NotificationGroupManager.getInstance()
-          .getNotificationGroup("Vespa YQL")
-          .createNotification(errMsg, NotificationType.ERROR)
-          .notify(event.getProject());
+      NotificationUtils.showNotification(event.getProject(), NotificationType.ERROR, errMsg);
     }
   }
 

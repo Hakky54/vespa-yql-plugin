@@ -11,6 +11,7 @@ import com.intellij.ui.jcef.JBCefApp;
 import com.pehrs.vespa.yql.plugin.YqlResult;
 import com.pehrs.vespa.yql.plugin.results.ZipkinBrowserPanel;
 import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsState;
+import com.pehrs.vespa.yql.plugin.util.BrowserUtils;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -131,9 +132,7 @@ public class ZipkinUtils {
 //      }
       // Workaround is to run xdg-open ...
       try {
-        YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-        Process p = Runtime.getRuntime().exec(
-            String.format("%s %s", settings.browserScript, uri.toString()));
+        BrowserUtils.openBrowser(uri);
       } catch (IOException ex) {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("Vespa YQL")

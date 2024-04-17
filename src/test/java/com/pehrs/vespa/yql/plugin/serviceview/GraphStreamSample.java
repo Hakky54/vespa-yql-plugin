@@ -1,4 +1,4 @@
-package com.pehrs.vespa.yql.plugin.graph;
+package com.pehrs.vespa.yql.plugin.serviceview;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -13,7 +13,6 @@ import org.graphstream.ui.swing.SwingGraphRenderer;
 import org.graphstream.ui.swing_viewer.DefaultView;
 import org.graphstream.ui.swing_viewer.SwingViewer;
 import org.graphstream.ui.view.Viewer;
-import org.junit.Test;
 
 public class GraphStreamSample {
 

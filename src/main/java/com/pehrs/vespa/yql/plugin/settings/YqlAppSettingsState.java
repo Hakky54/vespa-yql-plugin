@@ -1,6 +1,5 @@
 package com.pehrs.vespa.yql.plugin.settings;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
@@ -10,13 +9,11 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.intellij.util.xmlb.annotations.XCollection;
 import com.intellij.util.xmlb.annotations.XCollection.Style;
-import com.pehrs.vespa.yql.plugin.YQL;
 import java.awt.Color;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,8 +42,17 @@ public class YqlAppSettingsState implements PersistentStateComponent<YqlAppSetti
   @Tag("zipkin-endpoint")
   public String zipkinEndpoint = "http://localhost:9411";
 
-  @Tag("browser-script")
-  public String browserScript = YQL.getDefaultBrowserScript();
+  @Tag("maven-parameters")
+  public String mavenParameters = "package";
+
+  @Tag("tenant")
+  public String tenant = "default";
+
+  @Tag("logs-path")
+  public String logsPath = "";
+
+  @Tag("do-mintor-logs")
+  public boolean doMonitorLogs = false;
 
   @Tag("current-connection")
   public String currentConnection = "localhost";
@@ -76,6 +82,16 @@ public class YqlAppSettingsState implements PersistentStateComponent<YqlAppSetti
 
   public static YqlAppSettingsState getInstance() {
     return ApplicationManager.getApplication().getService(YqlAppSettingsState.class);
+  }
+
+  public boolean islogsPathLogarchivePath() {
+    return new File(logsPath).getAbsolutePath().contains(String.format("/logarchive"));
+  }
+  public String getZipkinEndpoint() {
+    if(this.zipkinEndpoint.endsWith("/")) {
+      return zipkinEndpoint.substring(0, zipkinEndpoint.length() - 2);
+    }
+    return zipkinEndpoint;
   }
 
   public Color getOverviewNodeColorLight() {

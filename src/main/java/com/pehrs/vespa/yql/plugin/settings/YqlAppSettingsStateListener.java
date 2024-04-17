@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 public interface YqlAppSettingsStateListener {
 
-  static List<YqlAppSettingsStateListener> listeners = new ArrayList<>();
+  List<YqlAppSettingsStateListener> listeners = new ArrayList<>();
 
   void stateChanged(YqlAppSettingsState instance);
 

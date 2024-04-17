@@ -8,7 +8,11 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
-import com.pehrs.vespa.yql.plugin.VespaClusterChecker.StatusListener;
+import com.intellij.openapi.wm.RegisterToolWindowTask;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowAnchor;
+import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.openapi.wm.ToolWindowManager;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -35,6 +39,9 @@ import org.slf4j.LoggerFactory;
 public class YQL implements StartupActivity {
 
   private static final Logger log = LoggerFactory.getLogger(YQL.class);
+
+  public final static String TOOL_WINDOW_ID = "YqlVespaResultsWindow";
+  public final static String TOOL_WINDOW_TITLE = "Vespa Results";
 
   public YQL() {
   }
@@ -152,10 +159,43 @@ public class YQL implements StartupActivity {
     }
   }
 
+  @NotNull
+  public static ToolWindow getVespaToolWindow(Project project, ToolWindowFactory intialFactory) {
+    ToolWindowManager mgr = ToolWindowManager.getInstance(project);
+    ToolWindow toolWindow = mgr.getToolWindow(TOOL_WINDOW_ID);
+    if (toolWindow == null) {
+      // log.warn("No tool window, let's try to create it :-)");
+      toolWindow = mgr.registerToolWindow(new RegisterToolWindowTask(
+          TOOL_WINDOW_ID,
+              ToolWindowAnchor.BOTTOM,
+              null,
+              false,
+              true,
+              false,
+              true,
+              intialFactory,
+              YqlIcons.FILE,
+              () -> TOOL_WINDOW_TITLE
+          )
+      );
+    }
+    return toolWindow;
+  }
+
   @Override
   public void runActivity(@NotNull Project project) {
     // Run once at startup :-)
     log.debug("vespa-yql-plugin STARTUP!");
+
+//    ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
+//    ToolWindow toolWindow = toolWindowManager.getToolWindow(
+//        VespaLogContent.TOOL_WINDOW_ID);
+//    if(toolWindow != null) {
+//      toolWindow.setAutoHide(true);
+//      toolWindow.hide();
+//      toolWindow.remove();
+//    }
+
 
     ApplicationManager.getApplication().executeOnPooledThread(() -> {
       for (; ; ) { // ever
@@ -185,45 +225,6 @@ public class YQL implements StartupActivity {
       }
     });
 
-//    ApplicationManager.getApplication().invokeLater(() -> {
-//      // Initial sleep...
-//      try {
-//        Thread.sleep(5000);
-//      } catch (InterruptedException e) {
-//        throw new RuntimeException(e);
-//      }
-//      for (;;) { // ever
-//        try {
-//          Thread.sleep(2000);
-//          log.info("VESPA-YQL-PLUGIN BACKGROUND CHECK...");
-//        } catch (InterruptedException e) {
-//          log.error("Interrupted!!!");
-//          throw new RuntimeException(e);
-//        }
-//      }
-//    }, ModalityState.NON_MODAL);
-
-//
-//    ProgressManager.getInstance().run(new Task.Backgroundable(project,
-//        "Vespa Cluster Checker", false) {
-//      @Override
-//      public void run(@NotNull ProgressIndicator indicator) {
-//        try {
-//          Thread.sleep(5000);
-//        } catch (InterruptedException e) {
-//          throw new RuntimeException(e);
-//        }
-//        for (; ; ) { // ever
-//          try {
-//            Thread.sleep(2000);
-//            log.info("VESPA-YQL-PLUGIN BACKGROUND CHECK...");
-//          } catch (InterruptedException e) {
-//            log.error("Interrupted!!!");
-//            throw new RuntimeException(e);
-//          }
-//        }
-//      }
-//    });
-
   }
+
 }

@@ -107,17 +107,22 @@ public class YqlResultsTableModel extends AbstractTableModel implements TableMod
   public void resultUpdated(YqlResult result) {
     try {
       this.result = result;
-      List<YqlQueryError> errors = result.getErrors();
-      if (errors.isEmpty()) {
-        this.columns = result.getColumnNames();
-        this.rows = result.getRows();
+      if(this.result != null) {
+        List<YqlQueryError> errors = result.getErrors();
+        if (errors.isEmpty()) {
+          this.columns = result.getColumnNames();
+          this.rows = result.getRows();
+        } else {
+          this.columns = List.of("code", "summary", "message");
+          this.rows = errors.stream().map(error -> new YqlResultRow(0.0d, Map.of(
+              "code", error.code(),
+              "summary", error.summary(),
+              "message", error.message()
+          ))).collect(Collectors.toList());
+        }
       } else {
-        this.columns = List.of("code", "summary", "message");
-        this.rows = errors.stream().map(error -> new YqlResultRow(0.0d, Map.of(
-            "code", error.code(),
-            "summary", error.summary(),
-            "message", error.message()
-        ))).collect(Collectors.toList());
+        this.columns = List.of();
+        this.rows = List.of();
       }
       fireTableStructureChanged();
       fireTableDataChanged();

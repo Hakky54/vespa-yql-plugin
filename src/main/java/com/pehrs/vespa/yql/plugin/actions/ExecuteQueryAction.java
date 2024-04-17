@@ -2,8 +2,6 @@ package com.pehrs.vespa.yql.plugin.actions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intellij.notification.NotificationGroupManager;
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -12,12 +10,13 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.wm.ToolWindowManager;
 import com.pehrs.vespa.yql.plugin.VespaClusterConnection;
 import com.pehrs.vespa.yql.plugin.YqlResult;
 import com.pehrs.vespa.yql.plugin.YqlResult.YqlQueryError;
 import com.pehrs.vespa.yql.plugin.psi.YqlFile;
-import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsState;
+import com.pehrs.vespa.yql.plugin.results.YqlResultsFactory;
+import com.pehrs.vespa.yql.plugin.util.NotificationUtils;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -55,44 +54,26 @@ public class ExecuteQueryAction extends AnAction {
     Project project = event.getRequiredData(CommonDataKeys.PROJECT);
 
     try {
+      String text = new String(virtualFile.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+//      String text = FileEditorManager.getInstance(project)
+//          .getSelectedTextEditor().getDocument().getText();
 
-      // Get current edited text
-      // @NotNull Editor editor = event.getRequiredData(
-      //    CommonDataKeys.EDITOR);
-      // Document document = editor.getDocument();
-      Document document = FileEditorManager.getInstance(project)
-          .getSelectedTextEditor().getDocument();
-
-      JsonNode parsed = objectMapper.readTree(document.getText());
+      JsonNode parsed = objectMapper.readTree(text);
       String pretty = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsed);
-
-      YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-
       log.debug("Run Query:\n" + pretty);
 
-      // YqlResult result = new YqlResult(YqlResult.YQL_SAMPLE_RESULT);
       YqlResult result = VespaClusterConnection.executeQuery(pretty);
       YqlResult.updateResult(result);
 
       List<YqlQueryError> errors = result.getErrors();
       if (errors.isEmpty()) {
-        ToolWindowManager.getInstance(project)
-            .getToolWindow("Vespa YQL Results").show(null);
+        YqlResultsFactory.showResults(event.getProject());
       } else {
-        String errMsg = errors.get(0).message();
-        NotificationGroupManager.getInstance()
-            .getNotificationGroup("Vespa YQL")
-            .createNotification(errMsg, NotificationType.ERROR)
-            .notify(project);
+        NotificationUtils.showException(event.getProject(), new RuntimeException(errors.get(0).message()));
       }
 
     } catch (Exception ex) {
-      String errMsg = ex.getMessage();
-      NotificationGroupManager.getInstance()
-          .getNotificationGroup("Vespa YQL")
-          .createNotification(errMsg, NotificationType.ERROR)
-          .notify(project);
-      // throw new RuntimeException(ex);
+      NotificationUtils.showException(event.getProject(), ex);
     }
   }
 }

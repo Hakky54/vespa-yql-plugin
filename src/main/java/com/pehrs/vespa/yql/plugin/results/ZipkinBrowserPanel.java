@@ -1,7 +1,6 @@
 package com.pehrs.vespa.yql.plugin.results;
 
 import com.intellij.icons.AllIcons.Ide;
-import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionPlaces;
@@ -13,8 +12,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.util.ui.JBUI.Borders;
-import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsState;
+import com.pehrs.vespa.yql.plugin.YqlResult;
+import com.pehrs.vespa.yql.plugin.YqlResult.YqlResultListener;
 import com.pehrs.vespa.yql.plugin.trace.TraceUtils;
+import com.pehrs.vespa.yql.plugin.util.BrowserUtils;
+import com.pehrs.vespa.yql.plugin.util.NotificationUtils;
 import java.awt.BorderLayout;
 import java.io.IOException;
 import java.net.URI;
@@ -45,26 +47,12 @@ public class ZipkinBrowserPanel extends JBPanel {
         "Open Zipkin trace in a browser", Ide.External_link_arrow) {
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
-        // Below code gets Intellij into trouble and makes the Debugger hang in the build process...
-//        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-//          try {
-//            Desktop.getDesktop().browse(ZipkinUtils.getUri(traceId));
-//          } catch (IOException | URISyntaxException ex) {
-//            throw new RuntimeException(ex);
-//          }
-//        }
-
-        // Workaround is to run xdg-open ...
         try {
-          YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
           URI uri = TraceUtils.getZipkinUri(traceId);
-          String cmd = String.format("%s %s", settings.browserScript, uri.toString());
-          Process p = Runtime.getRuntime().exec(cmd);
+          BrowserUtils.openBrowser(uri);
         } catch (IOException | URISyntaxException ex) {
-          NotificationGroupManager.getInstance()
-              .getNotificationGroup("Vespa YQL")
-              .createNotification("Could not open browser: " + ex.getMessage(), NotificationType.ERROR)
-              .notify(project);
+          String msg = "Could not open browser: " + ex.getMessage();
+          NotificationUtils.showNotification(project, NotificationType.ERROR, msg);
         }
       }
     };
