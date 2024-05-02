@@ -12,7 +12,6 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.ui.AnActionButton;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.OnePixelSplitter;
@@ -36,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.swing.AbstractListModel;
 import javax.swing.JButton;
@@ -222,8 +220,8 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
             .disableRemoveAction()
             .disableDownAction()
             .disableUpAction();
-    decorator.addExtraAction(
-        AnActionButton.fromAction(new DumbAwareAction("Add Connection", "", General.Add) {
+
+    decorator.addExtraAction(new DumbAwareAction("Add Connection", "", General.Add) {
           public void actionPerformed(@NotNull AnActionEvent e) {
             if (e == null) {
               return;
@@ -233,9 +231,8 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
               dialog.show();
             }
           }
-        }));
-    decorator.addExtraAction(
-        AnActionButton.fromAction(new DumbAwareAction("Delete Connection", "", General.Remove) {
+        });
+    decorator.addExtraAction(new DumbAwareAction("Delete Connection", "", General.Remove) {
           public void actionPerformed(@NotNull AnActionEvent e) {
             if (e == null) {
               return;
@@ -251,7 +248,7 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
               log.debug("Delete connection " + config.name);
             }
           }
-        }));
+        });
 
     JPanel panel = decorator.createPanel();
     panel.setBorder(Borders.empty());

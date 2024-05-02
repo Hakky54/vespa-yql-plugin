@@ -22,11 +22,6 @@ public class YqlResultsFactory implements ToolWindowFactory { // , DumbAware, Yq
   private YqlResultsTabView tabs;
 
   @Override
-  public boolean isApplicable(@NotNull Project project) {
-    return project != null;
-  }
-
-  @Override
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
 
     this.tabs = new YqlResultsTabView(project);
@@ -39,7 +34,7 @@ public class YqlResultsFactory implements ToolWindowFactory { // , DumbAware, Yq
   }
 
   public static void showResults(Project project) {
-    ToolWindow toolWindow = YQL.getVespaToolWindow(project, factory);
+    ToolWindow toolWindow = YQL.getVespaToolWindow(project);
     if (toolWindow != null) {
       final ToolWindow win = toolWindow;
       @NotNull ContentManager contentManager = win.getContentManager();

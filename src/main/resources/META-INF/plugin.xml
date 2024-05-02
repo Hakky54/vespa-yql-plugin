@@ -9,7 +9,7 @@
 
   <!-- Should work since 2023.1+ -->
   <!-- 2023.1.6: 231.9414.13 -->
-  <idea-version since-build="231"/>
+  <idea-version since-build="233"/>
 
   <!-- The EDQL plugin overrides ctrl-ENTER on ALL Editors!!! -->
   <incompatible-with>com.github.chengpohi</incompatible-with>
@@ -194,13 +194,11 @@
       anchor="right"
       icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
       factoryClass="com.pehrs.vespa.yql.plugin.dock.YqlDockFactory"/>
-    <!--
-    <toolWindow id="Vespa YQL Results"
+    <toolWindow id="Vespa Results"
       secondary="false"
       anchor="bottom"
       icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE"
       factoryClass="com.pehrs.vespa.yql.plugin.results.YqlResultsFactory"/>
-      -->
     <!--
     <toolWindow id="Vespa - Services/Node Overview"
       secondary="false"

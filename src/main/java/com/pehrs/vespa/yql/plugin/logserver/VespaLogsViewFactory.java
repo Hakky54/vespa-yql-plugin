@@ -25,12 +25,6 @@ public class VespaLogsViewFactory implements ToolWindowFactory {
 
   }
 
-  public boolean isApplicable(@NotNull Project project) {
-    // FIXME: Check if project is a Java or Vespa project!!!
-    return project != null;
-  }
-
-
   @Override
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
     // Create an instance of your custom content component
@@ -48,7 +42,7 @@ public class VespaLogsViewFactory implements ToolWindowFactory {
 
     // FIXME: Check to see if we Should open the log view here!
 
-    ToolWindow toolWindow = YQL.getVespaToolWindow(project, factory);
+    ToolWindow toolWindow = YQL.getVespaToolWindow(project);
     if (toolWindow != null) {
       final ToolWindow win = toolWindow;
       @NotNull ContentManager contentManager = win.getContentManager();

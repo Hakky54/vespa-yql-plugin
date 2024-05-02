@@ -3,7 +3,6 @@ package com.pehrs.vespa.yql.plugin.results;
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.json.JsonFileType;
 import com.intellij.json.JsonLanguage;
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionPlaces;
@@ -19,10 +18,8 @@ import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.fileChooser.FileSaverDescriptor;
 import com.intellij.openapi.fileChooser.FileSaverDialog;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.project.VetoableProjectManagerListener;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
@@ -103,17 +100,16 @@ public class YqlResultsJsonPanel extends JBPanel implements YqlResultListener, D
     editorSettings.setRightMarginShown(true);
 
     YqlResult.addResultListener(this);
-//    YqlResult.addResultListener(new YqlResultListener() {
-//      @Override
-//      public void resultUpdated(YqlResult result) {
-//        ApplicationManager.getApplication().runWriteAction(() -> {
-//          doc.setText(result.toString());
-//        });
-//      }
-//    });
 
-    AnAction exportAction = new DumbAwareAction("Export JSON", "Export JSON result",
+    AnAction exportAction = new AnAction("Export JSON", "Export JSON result",
         Actions.Download) {
+
+      @Override
+      public void update(@NotNull AnActionEvent event) {
+        boolean enabled = editor.getDocument().getText().trim().length() > 0;
+        event.getPresentation().setEnabledAndVisible(enabled);
+      }
+
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
         if (e == null) {
@@ -137,8 +133,16 @@ public class YqlResultsJsonPanel extends JBPanel implements YqlResultListener, D
         }
       }
     };
-    AnAction openInEditorAction = new DumbAwareAction("Open in Editor",
+    AnAction openInEditorAction = new AnAction("Open in Editor",
         "Create new file and open JSON response in editor", Actions.AddFile) {
+
+
+      @Override
+      public void update(@NotNull AnActionEvent event) {
+        boolean enabled = editor.getDocument().getText().trim().length() > 0;
+        event.getPresentation().setEnabledAndVisible(enabled);
+      }
+
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
         if (e == null) {

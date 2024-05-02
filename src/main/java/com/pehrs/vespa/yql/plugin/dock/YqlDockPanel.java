@@ -49,14 +49,12 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
   private static final Logger log = LoggerFactory.getLogger(YqlDockPanel.class);
 
   private final Project project;
-//  private DefaultMutableTreeNode configRoot;
-//  private DefaultTreeModel treeModel;
-//  private DnDAwareTree configTree;
 
   private JBTable clusterTable;
   private VespaClusterStatusTableModel clusterTableModel;
-  private AnActionButton configActionBtn;
-  private AnActionButton openLogsConfigBtn;
+  private AnAction configAction;
+  private AnAction openLogsConfig;
+  private boolean openLogsConfigEnabled = true;
 
 
   public YqlDockPanel(Project project) {
@@ -71,73 +69,6 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
   private void createComponents() {
 
     JBLabel label = new JBLabel();
-
-//    this.configRoot = new DefaultMutableTreeNode();
-//    this.configRoot.setUserObject("Vespa Clusters");
-//    this.treeModel = new DefaultTreeModel(configRoot);
-//    this.configTree = new DnDAwareTree(treeModel);
-//
-//    this.configTree.addMouseListener(new MouseAdapter() {
-//      @Override
-//      public void mouseClicked(MouseEvent e) {
-//        if (e.getClickCount() >= 2) {
-//          TreePath path = configTree.getLeadSelectionPath();
-//          if (path == null) {
-//            super.mouseClicked(e);
-//            return;
-//          }
-//          DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-//          Object userObj = node.getUserObject();
-//          if (userObj instanceof VespaClusterConfig config) {
-//            // This is a double click :-)
-//            YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-//            settings.currentConnection = config.name;
-//            YqlAppSettingsStateListener.notifyListeners(settings);
-//          }
-//          super.mouseClicked(e);
-//        }
-////        if (e.getClickCount() == 1) {
-////          // Selected
-////          TreePath path = configTree.getLeadSelectionPath();
-////          DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-////          Object userObj = node.getUserObject();
-////          if (userObj instanceof VespaClusterConfig config) {
-////            nameField.setText(config.name);
-////            queryEndpointField.setText(config.queryEndpoint);
-////            configEndpointField.setText(config.configEndpoint);
-////          }
-////        }
-//      }
-//    });
-//
-//    //
-//    // Renderer
-//    //
-//    this.configTree.setCellRenderer((tree, value, selected, expanded, leaf, row, hasFocus) -> {
-//      DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-//      if (node == configRoot) {
-//        label.setText("Vespa Clusters");
-//        label.setIcon(Nodes.ConfigFolder);
-//      } else {
-//        Object uo = node.getUserObject();
-//        if (uo instanceof VespaClusterConfig config) {
-//          label.setText(String.format("%s - %s", config.name, config.queryEndpoint));
-//          YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-//          if (config.name.equals(settings.currentConnection)) {
-//            // label.setIcon(Actions.Checked);
-//            label.setIcon(Diff.GutterCheckBoxSelected);
-//          } else {
-//            // label.setIcon(YqlIcons.FILE);
-//            // label.setIcon(null);
-//            label.setIcon(Diff.GutterCheckBox);
-//          }
-//        } else {
-//          label.setText("" + uo);
-//          label.setIcon(null);
-//        }
-//      }
-//      return label;
-//    });
 
     this.clusterTableModel = new VespaClusterStatusTableModel();
     this.clusterTable = new JBTable(clusterTableModel);
@@ -248,39 +179,8 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
             .disableRemoveAction()
             .disableDownAction()
             .disableUpAction();
-//    decorator.addExtraAction(
-//        AnActionButton.fromAction(new DumbAwareAction("Add Connection", "", General.Add) {
-//          public void actionPerformed(@NotNull AnActionEvent e) {
-//            if (e == null) {
-//              return;
-//            }
-//            if (project != null) {
-//              YqlAddConnectionDialog dialog = new YqlAddConnectionDialog(project);
-//              dialog.show();
-//            }
-//          }
-//        }));
-//    decorator.addExtraAction(
-//        AnActionButton.fromAction(new DumbAwareAction("Delete Connection", "", General.Remove) {
-//          public void actionPerformed(@NotNull AnActionEvent e) {
-//            if (e == null) {
-//              return;
-//            }
-//
-//            DefaultMutableTreeNode selected =
-//                (DefaultMutableTreeNode) configTree.getLeadSelectionPath().getLastPathComponent();
-//            VespaClusterConfig config = (VespaClusterConfig) selected.getUserObject();
-//
-//            YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-//            settings.removeClusterConfig(config);
-//            YqlAppSettingsStateListener.notifyListeners(settings);
-//
-//            System.out.println(
-//                "Delete connection!!!" + configTree.getLeadSelectionPath().getLastPathComponent());
-//          }
-//        }));
 
-    this.configActionBtn = new AnActionButton("Config", "Open configuration", General.Settings ) {
+    this.configAction = new AnAction("Config", "Open configuration", General.Settings ) {
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
         if (e == null) {
@@ -290,7 +190,7 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
         // "com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsConfigurable");
       }
     };
-    decorator.addExtraAction(configActionBtn);
+    decorator.addExtraAction(configAction);
 
     AnAction reloadAction = new AnAction("Refresh Vespa Cluster Status", "...", Actions.Refresh) {
       public void actionPerformed(@NotNull AnActionEvent e) {
@@ -304,7 +204,13 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
       }
     };
     decorator.addExtraAction(reloadAction);
-    this.openLogsConfigBtn = new AnActionButton("Open Vespa Logs", "...", General.Warning) {
+    this.openLogsConfig = new AnAction("Open Vespa Logs", "...", General.Warning) {
+
+      @Override
+      public void update(@NotNull AnActionEvent event) {
+        event.getPresentation().setEnabledAndVisible(openLogsConfigEnabled);
+      }
+
       public void actionPerformed(@NotNull AnActionEvent e) {
         if (e == null) {
           return;
@@ -315,8 +221,8 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
       }
     };
     YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-    openLogsConfigBtn.setEnabled(settings.doMonitorLogs);
-    decorator.addExtraAction(openLogsConfigBtn);
+    this.openLogsConfigEnabled = settings.doMonitorLogs;
+    decorator.addExtraAction(openLogsConfig);
 
     JPanel treePanel = decorator.createPanel();
     treePanel.setBorder(Borders.empty());
@@ -347,16 +253,6 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
     super.add(myMainPanel, BorderLayout.NORTH);
   }
 
-//  public void addClusterConfig(VespaClusterConfig config) {
-//    this.configRoot.add(new DefaultMutableTreeNode(config, false));
-//  }
-
-//  public void setVespaClusterConfigs(List<VespaClusterConfig> configs) {
-//    configRoot.removeAllChildren();
-//    configs.stream().forEach(config -> addClusterConfig(config));
-//    treeModel.nodeStructureChanged(configRoot);
-//  }
-
   public void refresh() {
     // YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
     // setVespaClusterConfigs(settings.clusterConfigs);
@@ -366,7 +262,7 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
   @Override
   public void stateChanged(YqlAppSettingsState instance) {
     YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
-    openLogsConfigBtn.setEnabled(settings.doMonitorLogs);
+    this.openLogsConfigEnabled = settings.doMonitorLogs;
     this.refresh();
   }
 }

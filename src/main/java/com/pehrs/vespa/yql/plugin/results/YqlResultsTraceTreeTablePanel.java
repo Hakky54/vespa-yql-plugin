@@ -93,7 +93,7 @@ public class YqlResultsTraceTreeTablePanel extends JBPanel {
     treeTable.setShowGrid(true);
 
     TreeTableTree tree = treeTable.getTree();
-    UIUtil.setLineStyleAngled(tree);
+    // UIUtil.setLineStyleAngled(tree);
     tree.setShowsRootHandles(true);
     tree.setRootVisible(true);
 

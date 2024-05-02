@@ -9,6 +9,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
 import com.intellij.openapi.wm.RegisterToolWindowTask;
+import com.intellij.openapi.wm.RegisterToolWindowTaskBuilder;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowFactory;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +42,7 @@ public class YQL implements StartupActivity {
 
   private static final Logger log = LoggerFactory.getLogger(YQL.class);
 
-  public final static String TOOL_WINDOW_ID = "YqlVespaResultsWindow";
-  public final static String TOOL_WINDOW_TITLE = "Vespa Results";
+  public final static String TOOL_WINDOW_ID = "Vespa Results";
 
   public YQL() {
   }
@@ -160,26 +161,9 @@ public class YQL implements StartupActivity {
   }
 
   @NotNull
-  public static ToolWindow getVespaToolWindow(Project project, ToolWindowFactory intialFactory) {
+  public static ToolWindow getVespaToolWindow(Project project) {
     ToolWindowManager mgr = ToolWindowManager.getInstance(project);
-    ToolWindow toolWindow = mgr.getToolWindow(TOOL_WINDOW_ID);
-    if (toolWindow == null) {
-      // log.warn("No tool window, let's try to create it :-)");
-      toolWindow = mgr.registerToolWindow(new RegisterToolWindowTask(
-          TOOL_WINDOW_ID,
-              ToolWindowAnchor.BOTTOM,
-              null,
-              false,
-              true,
-              false,
-              true,
-              intialFactory,
-              YqlIcons.FILE,
-              () -> TOOL_WINDOW_TITLE
-          )
-      );
-    }
-    return toolWindow;
+    return mgr.getToolWindow(TOOL_WINDOW_ID);
   }
 
   @Override
@@ -187,15 +171,13 @@ public class YQL implements StartupActivity {
     // Run once at startup :-)
     log.debug("vespa-yql-plugin STARTUP!");
 
-//    ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-//    ToolWindow toolWindow = toolWindowManager.getToolWindow(
-//        VespaLogContent.TOOL_WINDOW_ID);
-//    if(toolWindow != null) {
-//      toolWindow.setAutoHide(true);
-//      toolWindow.hide();
-//      toolWindow.remove();
-//    }
-
+    ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
+    ToolWindow toolWindow = toolWindowManager.getToolWindow(TOOL_WINDOW_ID);
+    if(toolWindow != null) {
+      toolWindow.setAutoHide(true);
+      toolWindow.hide();
+      // toolWindow.remove();
+    }
 
     ApplicationManager.getApplication().executeOnPooledThread(() -> {
       for (; ; ) { // ever

@@ -15,30 +15,17 @@ public class YqlDockFactory implements ToolWindowFactory, DumbAware { // }, YqlA
 
   Project project;
   private YqlDockPanel settingsComponent;
-  // private YqlAppSettingsComponent settingsComponent;
 
-  @Override
-  public boolean isApplicable(@NotNull Project project) {
-    return project != null;
-  }
 
   @Override
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
 
     this.project = project;
 
-    // YqlAppSettingsStateListener.addListener(this);
-
-   //  this.settingsComponent = new YqlAppSettingsComponent(project, false);
     this.settingsComponent = new YqlDockPanel(project);
     ContentManager contentManager = toolWindow.getContentManager();
     Content content = contentManager.getFactory().createContent(settingsComponent, null, false);
     contentManager.addContent(content);
   }
 
-
-//  @Override
-//  public void stateChanged(YqlAppSettingsState instance) {
-//    this.settingsComponent.refresh();
-//  }
 }

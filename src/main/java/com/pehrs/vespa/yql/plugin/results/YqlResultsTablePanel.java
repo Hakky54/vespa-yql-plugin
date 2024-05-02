@@ -1,9 +1,9 @@
 package com.pehrs.vespa.yql.plugin.results;
 
 import com.intellij.icons.AllIcons.Actions;
-import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
+import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.fileChooser.FileSaverDescriptor;
@@ -34,8 +34,11 @@ public class YqlResultsTablePanel extends JBPanel {
   private final Project project;
   @Getter
   private YqlResultsTableModel tableModel;
-  private AnActionButton exportAsCsvBtn;
-  private AnActionButton exportAsTsvBtn;
+  private AnAction exportAsCsvAction;
+  private boolean exportAsCsvActionEnabled = false;
+  private AnAction exportAsTsvAction;
+  private boolean exportAsTsvActionEnabled = false;
+
 
   public YqlResultsTablePanel(Project project) {
     super(new BorderLayout());
@@ -45,8 +48,8 @@ public class YqlResultsTablePanel extends JBPanel {
   }
 
   public void enableExport(boolean enable) {
-    this.exportAsCsvBtn.setEnabled(enable);
-    this.exportAsTsvBtn.setEnabled(enable);
+    this.exportAsCsvActionEnabled = enable;
+    this.exportAsTsvActionEnabled = enable;
   }
 
   protected void notifyModel() {
@@ -77,7 +80,13 @@ public class YqlResultsTablePanel extends JBPanel {
             .initPosition()
             .setToolbarPosition(ActionToolbarPosition.TOP);
 
-    this.exportAsCsvBtn = new AnActionButton("Export as CSV", Actions.Download) {
+    this.exportAsCsvAction = new AnAction("Export as CSV", null, Actions.Download) {
+
+      @Override
+      public void update(@NotNull AnActionEvent event) {
+        event.getPresentation().setEnabledAndVisible(exportAsCsvActionEnabled);
+      }
+
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
         if (e == null) {
@@ -101,16 +110,15 @@ public class YqlResultsTablePanel extends JBPanel {
         }
       }
     };
-    decorator.addExtraAction(exportAsCsvBtn);
+    decorator.addExtraAction(exportAsCsvAction);
 
-//    decorator.addExtraAction(
-//        AnActionButton.fromAction(
-//            new DumbAwareAction("Export as CSV", "Export table as CSV", Actions.Download) {
-//              public void actionPerformed(@NotNull AnActionEvent e) {
-//              }
-//            }));
+    this.exportAsTsvAction = new AnAction("Export as TSV", null, Actions.Download) {
 
-    this.exportAsTsvBtn = new AnActionButton("Export as CSV", Actions.Download) {
+      @Override
+      public void update(@NotNull AnActionEvent event) {
+        event.getPresentation().setEnabledAndVisible(exportAsTsvActionEnabled);
+      }
+
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
         FileSaverDescriptor descriptor = new FileSaverDescriptor(
@@ -131,15 +139,7 @@ public class YqlResultsTablePanel extends JBPanel {
         }
       }
     };
-
-//    decorator.addExtraAction(
-//        AnActionButton.fromAction(
-//            new DumbAwareAction("Export as TSV", "Export table as TSV", Actions.Download) {
-//              public void actionPerformed(@NotNull AnActionEvent e) {
-//
-//              }
-//            }));
-    decorator.addExtraAction(this.exportAsTsvBtn);
+    decorator.addExtraAction(this.exportAsTsvAction);
 
     JPanel panel = decorator.createPanel();
     panel.setBorder(Borders.empty());
