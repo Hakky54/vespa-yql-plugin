@@ -14,6 +14,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.EditorSettings;
+import com.intellij.openapi.editor.toolbar.floating.FloatingToolbar;
 import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.fileChooser.FileSaverDescriptor;
 import com.intellij.openapi.fileChooser.FileSaverDialog;
@@ -164,7 +165,8 @@ public class YqlResultsJsonPanel extends JBPanel implements YqlResultListener, D
       }
     };
 
-    ActionToolbarImpl toolbar = new ActionToolbarImpl(ActionPlaces.TOOLBAR, actions, true);
+    // ActionToolbarImpl toolbar = new ActionToolbarImpl(ActionPlaces.TOOLBAR, actions, true);
+    FloatingToolbar toolbar = new FloatingToolbar(editor.getComponent(), actions, this);
     toolbar.setEnabled(false);
 
     toolbar.setTargetComponent(editor.getComponent());

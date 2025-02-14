@@ -4,9 +4,11 @@ import com.intellij.icons.AllIcons.Ide;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl;
+import com.intellij.openapi.editor.toolbar.floating.FloatingToolbar;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBPanel;
@@ -65,10 +67,12 @@ public class ZipkinBrowserPanel extends JBPanel {
       }
     };
 
-    ActionToolbarImpl toolbar = new ActionToolbarImpl(ActionPlaces.TOOLBAR, actions, true);
+    @NotNull JComponent browserComponent = zipkinBrowser.getComponent();
+
+
+    FloatingToolbar toolbar = new FloatingToolbar(browserComponent, actions, zipkinBrowser);
     toolbar.setEnabled(false);
 
-    @NotNull JComponent browserComponent = zipkinBrowser.getComponent();
     toolbar.setTargetComponent(browserComponent);
     super.add(toolbar, BorderLayout.NORTH);
     super.add(browserComponent, BorderLayout.CENTER);

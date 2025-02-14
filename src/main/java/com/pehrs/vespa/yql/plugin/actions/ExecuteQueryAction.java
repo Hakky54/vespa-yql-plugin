@@ -51,7 +51,7 @@ public class ExecuteQueryAction extends AnAction {
     if (virtualFile == null) {
       return;
     }
-    Project project = event.getRequiredData(CommonDataKeys.PROJECT);
+    Project project = event.getData(CommonDataKeys.PROJECT);
 
     try {
       String text = new String(virtualFile.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
