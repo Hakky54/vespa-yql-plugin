@@ -14,7 +14,7 @@ fi
 ./gradlew buildPlugin
 
 # Run the verifier
-IDE_ROOT=/opt/idea-IC-233.15026.9
+IDE_ROOT=${IDE_ROOT:-/opt/idea-IC-243.23654.189}
 LATEST_PLUGIN=$(ls build/distributions/*.zip | tail -1)
 java -jar build/verifier-all.jar \
      check-plugin \
