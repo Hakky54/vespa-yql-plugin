@@ -24,6 +24,7 @@ public class YqlAddConnectionDialog  extends DialogWrapper {
   private JBTextField nameField;
   private JBTextField queryEndpointField;
   private JBTextField configEndpointField;
+  private JBTextField clusterControllerEndpointField;
 
   private final JBLabel sslUseClientCertLabel;
   private final JBCheckBox sslUseClientCertCheckBox;
@@ -105,6 +106,7 @@ public class YqlAddConnectionDialog  extends DialogWrapper {
               this.nameField.getText(),
               this.queryEndpointField.getText(),
               this.configEndpointField.getText(),
+              this.clusterControllerEndpointField.getText(),
               this.sslUseClientCertCheckBox.isSelected(),
               this.sslCaCertText.getText(),
               this.sslClientCertText.getText(),
@@ -128,11 +130,14 @@ public class YqlAddConnectionDialog  extends DialogWrapper {
       queryEndpointField.setText("http://localhost:8080/search/");
       configEndpointField = new JBTextField();
       configEndpointField.setText("http://localhost:19071");
+      clusterControllerEndpointField = new JBTextField();
+      clusterControllerEndpointField.setText("http://localhost:19050");
 
       panel = FormBuilder.createFormBuilder()
           .addLabeledComponent(new JBLabel("Name: "), nameField, 1, false)
           .addLabeledComponent(new JBLabel("Query Endpoint: "), queryEndpointField, 1, false)
           .addLabeledComponent(new JBLabel("Config endpoint: "), configEndpointField, 1, false)
+          .addLabeledComponent(new JBLabel("Controller endpoint: "), clusterControllerEndpointField, 1, false)
           .addSeparator()
           .addComponent(new JBLabel("SSL"))
           .addLabeledComponent(this.sslUseClientCertLabel, sslUseClientCertCheckBox, false)

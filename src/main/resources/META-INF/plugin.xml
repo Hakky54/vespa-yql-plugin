@@ -7,7 +7,7 @@
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
   <name>Vespa-yql</name>
 
-  <version>1.0.4</version>
+  <version>1.0.5</version>
 
   <!-- Should work since 2023.1+ -->
   <!-- 2023.1.6: 231.9414.13 -->
@@ -45,6 +45,13 @@
   <change-notes><![CDATA[
 
 <ul class="incremental">
+  <li>[1.0.5] - Minor changes
+      <ul class="incremental">
+        <li>Added link in panel to cluster controller.</li>
+        <li>Added config value for cluster controller endpoint.</li>
+        <li>Removed zipkin browser panel and changed it to a upload and open browser button.</li>
+      </ul>
+  </li>
   <li>[1.0.4] - Build script update to support 2024+ version of intellij</li>
   <li>[1.0.3] - Support for Vespa Java Apps
     <ul class="incremental">
@@ -156,6 +163,13 @@
         icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE">
         <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
       </action>
+<!--      <action class="com.pehrs.vespa.yql.plugin.actions.ClusterStatusAction"-->
+<!--        id="ClusterStatusAction"-->
+<!--        text="Show Cluster Status"-->
+<!--        description="Show Cluster-Controller status"-->
+<!--        icon="com.pehrs.vespa.yql.plugin.YqlIcons.FILE">-->
+<!--        <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>-->
+<!--      </action>-->
 
       <action class="com.pehrs.vespa.yql.plugin.actions.OpenLogsAction"
         id="YqlOpenVespaLogs"

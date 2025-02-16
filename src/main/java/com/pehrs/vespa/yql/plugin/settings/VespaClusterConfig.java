@@ -10,6 +10,7 @@ public class VespaClusterConfig {
   public String name;
   public String queryEndpoint;
   public String configEndpoint;
+  public String clusterControllerEndpoint;
 
   @Tag("ssl-use-client-cert")
   public boolean sslUseClientCert = false;
@@ -39,6 +40,14 @@ public class VespaClusterConfig {
     }
   }
 
+  public URI getControllerUri() {
+    try {
+      return new URI(this.clusterControllerEndpoint);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public VespaClusterConfig() {
   }
 
@@ -46,6 +55,7 @@ public class VespaClusterConfig {
       String name,
       String queryEndpoint,
       String configEndpoint,
+      String clusterControllerEndpoint,
       Boolean useClientCert,
       String caCert,
       String clientCert,
@@ -53,6 +63,7 @@ public class VespaClusterConfig {
     this.name = name;
     this.queryEndpoint = queryEndpoint;
     this.configEndpoint = configEndpoint;
+    this.clusterControllerEndpoint = clusterControllerEndpoint;
     this.sslUseClientCert = useClientCert;
     this.sslCaCert = caCert;
     this.sslClientCert = clientCert;
@@ -65,6 +76,7 @@ public class VespaClusterConfig {
         this.name,
         this.queryEndpoint,
         this.configEndpoint,
+        this.clusterControllerEndpoint,
         this.sslUseClientCert,
         this.sslCaCert,
         this.sslClientCert,

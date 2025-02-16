@@ -95,7 +95,7 @@ public class VespaServicesPanel extends JComponent {
 
     this.label = new JBLabel("content");
     this.label.setLocation(10, 10);
-    Dimension dim = new Dimension(100, 20);
+    // Dimension dim = new Dimension(100, 20);
     // this.label.setMinimumSize(dim);
     // this.label.setSize(dim);
     this.label.setVisible(true);

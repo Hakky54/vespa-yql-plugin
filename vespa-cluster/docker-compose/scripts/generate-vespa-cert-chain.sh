@@ -55,13 +55,20 @@ openssl req -new -key ${OUTPUT_DIRECTORY}/host.key -out ${OUTPUT_DIRECTORY}/host
     -subj '/C=SE/L=Stockholm/O=SampleApp Inc/OU=Vespa Sample Apps' \
     -sha256
 
-openssl x509 -req -in ${OUTPUT_DIRECTORY}/host.csr \
-    -CA ${OUTPUT_DIRECTORY}/ca-vespa.pem \
-    -CAkey ${OUTPUT_DIRECTORY}/ca-vespa.key \
-    -CAcreateserial \
-    -CAserial ${OUTPUT_DIRECTORY}/serial.srl \
-    -out ${OUTPUT_DIRECTORY}/host.pem \
-    -extfile ${OUTPUT_DIRECTORY}/cert-exts.cnf \
-    -extensions host_exts \
-    -days 10000 \
-    -sha256
+openssl x509 -req \
+	-in ${OUTPUT_DIRECTORY}/host.csr \
+	-CA ${OUTPUT_DIRECTORY}/ca-vespa.pem \
+	-CAkey ${OUTPUT_DIRECTORY}/ca-vespa.key \
+	-CAcreateserial \
+	-CAserial ${OUTPUT_DIRECTORY}/serial.srl \
+	-out ${OUTPUT_DIRECTORY}/host.pem \
+	-extfile ${OUTPUT_DIRECTORY}/cert-exts.cnf \
+	-extensions host_exts \
+	-days 10000 \
+	-sha256
+
+openssl pkcs12 -export \
+	-out ${OUTPUT_DIRECTORY}/client.full.pfx \
+	-inkey ${OUTPUT_DIRECTORY}/host.key \
+	-in ${OUTPUT_DIRECTORY}/host.pem \
+	-certfile ${OUTPUT_DIRECTORY}/ca-vespa.pem

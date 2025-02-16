@@ -80,6 +80,7 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
   private final JBTextField nameField;
   private final JBTextField queryEndpointField;
   private final JBTextField configEndpointField;
+  private final JBTextField controllerEndpointField;
   private String lastPath = null;
 
 //  private DefaultMutableTreeNode configRoot;
@@ -133,6 +134,12 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
         (vespaClusterConfig, value) -> {
           vespaClusterConfig.configEndpoint = value;
         }));
+    this.controllerEndpointField = new JBTextField();
+    this.controllerEndpointField.addKeyListener(new TextFieldAdapter(this.controllerEndpointField,
+        (vespaClusterConfig, value) -> {
+          vespaClusterConfig.clusterControllerEndpoint = value;
+        }));
+
     sslUseClientCertLabel = new JBLabel("Use client cert");
     sslUseClientCertLabel.setEnabled(true);
     sslUseClientCertCheckBox = new JBCheckBox();
@@ -199,6 +206,7 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
         .addLabeledComponent(new JBLabel("Name: "), nameField)
         .addLabeledComponent(new JBLabel("Query endpoint: "), queryEndpointField)
         .addLabeledComponent(new JBLabel("Config endpoint: "), configEndpointField)
+        .addLabeledComponent(new JBLabel("Controller endpoint: "), controllerEndpointField)
         .addSeparator()
         .addComponent(new JBLabel("SSL/TLS"))
         .addLabeledComponent(this.sslUseClientCertLabel, sslUseClientCertCheckBox, false)
@@ -387,6 +395,7 @@ public class YqlAppSettingsComponent implements YqlAppSettingsStateListener {
           nameField.setText(config.name);
           queryEndpointField.setText(config.queryEndpoint);
           configEndpointField.setText(config.configEndpoint);
+          controllerEndpointField.setText(config.clusterControllerEndpoint);
           sslUseClientCertCheckBox.setSelected(config.sslUseClientCert);
           sslCaCertText.setText(config.sslCaCert);
           sslClientCertText.setText(config.sslClientCert);

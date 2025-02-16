@@ -31,6 +31,7 @@ public class YqlAppSettingsState implements PersistentStateComponent<YqlAppSetti
               "localhost",
               "http://localhost:8080/search/",
               "http://localhost:19071",
+              "http://localhost:19050",
               false,
               "",
               "",

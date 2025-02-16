@@ -22,9 +22,11 @@ import com.pehrs.vespa.yql.plugin.trace.TraceUtils;
 import com.pehrs.vespa.yql.plugin.trace.YqlTraceMessage;
 import com.pehrs.vespa.yql.plugin.trace.YqlTraceNodeBase;
 import com.pehrs.vespa.yql.plugin.trace.YqlTraceThread;
+import com.pehrs.vespa.yql.plugin.util.BrowserUtils;
 import com.pehrs.vespa.yql.plugin.util.NotificationUtils;
 import java.awt.BorderLayout;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,21 +40,22 @@ public class YqlResultsTraceTreeTablePanel extends JBPanel {
   private final Project project;
   private final int traceTabIndex;
 
-  private final int zipkinTabIndex;
-  private final ZipkinBrowserPanel zipkinPanel;
+  // private final int zipkinTabIndex;
+  // private final ZipkinBrowserPanel zipkinPanel;
 
   private JTabbedPane tabs;
 
   @Getter
   private YqlResultsTraceTreeTableModel model;
 
-  public YqlResultsTraceTreeTablePanel(Project project, JTabbedPane tabs, int traceTabIndex, int zipkinTabIndex, ZipkinBrowserPanel zipkinPanel) {
+  public YqlResultsTraceTreeTablePanel(Project project, JTabbedPane tabs,
+      int traceTabIndex) {
     super(new BorderLayout());
     this.project = project;
     this.tabs = tabs;
     this.traceTabIndex = traceTabIndex;
-    this.zipkinTabIndex = zipkinTabIndex;
-    this.zipkinPanel = zipkinPanel;
+    // this.zipkinTabIndex = zipkinTabIndex;
+    // this.zipkinPanel = zipkinPanel;
     super.setBorder(Borders.empty());
     createComponents();
   }
@@ -77,10 +80,10 @@ public class YqlResultsTraceTreeTablePanel extends JBPanel {
         } else {
           treeCellLabel.setText(name);
         }
-        if(value instanceof YqlTraceThread) {
+        if (value instanceof YqlTraceThread) {
           treeCellLabel.setIcon(Debugger.Threads);
-        } else if(value instanceof YqlTraceMessage) {
-            treeCellLabel.setIcon(Nodes.Folder);
+        } else if (value instanceof YqlTraceMessage) {
+          treeCellLabel.setIcon(Nodes.Folder);
         } else {
           treeCellLabel.setIcon(Debugger.ThreadAtBreakpoint);
         }
@@ -102,33 +105,36 @@ public class YqlResultsTraceTreeTablePanel extends JBPanel {
             .initPosition()
             .setToolbarPosition(ActionToolbarPosition.TOP);
 
-    decorator.addExtraAction(new DumbAwareAction("Upload to Zipkin", "Upload and view in Zipkin Panel",
-        YqlIcons.ZIPKIN) {
-      @Override
-      public void actionPerformed(@NotNull AnActionEvent e) {
-        if (e == null) {
-          return;
-        }
-        try {
-          String traceID = TraceUtils.uploadToZipkin();
+    decorator.addExtraAction(
+        new DumbAwareAction("Upload to Zipkin", "Upload and view in Zipkin Panel",
+            YqlIcons.ZIPKIN) {
+          @Override
+          public void actionPerformed(@NotNull AnActionEvent e) {
+            if (e == null) {
+              return;
+            }
+            try {
+              String traceID = TraceUtils.uploadToZipkin();
 
-          String msg = "Zipkin trace " +traceID + " uploaded!";
-          NotificationUtils.showNotification(project, NotificationType.INFORMATION, msg);
+              String msg = "Zipkin trace " + traceID + " uploaded!";
+              NotificationUtils.showNotification(project, NotificationType.INFORMATION, msg);
 
-          TraceUtils.openTrace(project, traceID, zipkinPanel);
+              // TraceUtils.openTrace(project, traceID, zipkinPanel);
+              URI uri = TraceUtils.getZipkinUri(traceID);
+              BrowserUtils.openBrowser(uri);
 
-          tabs.setEnabledAt(zipkinTabIndex, true);
-          tabs.setSelectedIndex(zipkinTabIndex);
+//              tabs.setEnabledAt(zipkinTabIndex, true);
+//              tabs.setSelectedIndex(zipkinTabIndex);
 
-        } catch (JsonProcessingException ex) {
-          String msg = "Zipkin Upload failed";
-          NotificationUtils.showNotification(project, NotificationType.ERROR, msg);
-        } catch (IOException | URISyntaxException ex) {
-          String msg = "Could not open default browser";
-          NotificationUtils.showNotification(project, NotificationType.ERROR, msg);
-        }
-      }
-    });
+            } catch (JsonProcessingException ex) {
+              String msg = "Zipkin Upload failed";
+              NotificationUtils.showNotification(project, NotificationType.ERROR, msg);
+            } catch (IOException | URISyntaxException ex) {
+              String msg = "Could not open default browser";
+              NotificationUtils.showNotification(project, NotificationType.ERROR, msg);
+            }
+          }
+        });
     JPanel panel = decorator.createPanel();
     panel.setBorder(Borders.empty());
 
@@ -139,7 +145,7 @@ public class YqlResultsTraceTreeTablePanel extends JBPanel {
         tca.setColumnMaxWidth(650);
         tca.adjustColumns();
 
-        if(tabs != null) {
+        if (tabs != null) {
           YqlResult res = YqlResult.getYqlResult();
           if (res.getErrors().size() > 0) {
             tabs.setEnabledAt(traceTabIndex, false);

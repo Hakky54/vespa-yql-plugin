@@ -38,7 +38,6 @@ public class ZipkinBrowserPanel extends JBPanel {
     this.project = project;
     super.setBorder(Borders.empty());
     this.zipkinBrowser = new JBCefBrowser();
-    // this.zipkinBrowser = null;
     createComponents();
   }
 
@@ -68,7 +67,6 @@ public class ZipkinBrowserPanel extends JBPanel {
     };
 
     @NotNull JComponent browserComponent = zipkinBrowser.getComponent();
-
 
     FloatingToolbar toolbar = new FloatingToolbar(browserComponent, actions, zipkinBrowser);
     toolbar.setEnabled(false);

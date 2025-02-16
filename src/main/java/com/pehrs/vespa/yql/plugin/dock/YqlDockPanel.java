@@ -1,5 +1,6 @@
 package com.pehrs.vespa.yql.plugin.dock;
 
+import static com.pehrs.vespa.yql.plugin.dock.VespaClusterStatusTableModel.APP_NAME_COLUMN;
 import static com.pehrs.vespa.yql.plugin.dock.VespaClusterStatusTableModel.CLUSTER_COLUMN;
 import static com.pehrs.vespa.yql.plugin.dock.VespaClusterStatusTableModel.CONFIG_COLUMN;
 import static com.pehrs.vespa.yql.plugin.dock.VespaClusterStatusTableModel.QUERY_COLUMN;
@@ -7,6 +8,7 @@ import static com.pehrs.vespa.yql.plugin.dock.VespaClusterStatusTableModel.USE_C
 
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.icons.AllIcons.General;
+import com.intellij.icons.AllIcons.Ide;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
@@ -16,7 +18,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.AnActionButton;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
@@ -32,10 +33,12 @@ import com.pehrs.vespa.yql.plugin.logserver.VespaLogsViewFactory;
 import com.pehrs.vespa.yql.plugin.settings.VespaClusterConfig;
 import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsState;
 import com.pehrs.vespa.yql.plugin.settings.YqlAppSettingsStateListener;
+import com.pehrs.vespa.yql.plugin.status.ClusterStatus;
 import com.pehrs.vespa.yql.plugin.swing.TableColumnAdjuster;
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Map;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.event.TableModelEvent;
@@ -84,6 +87,13 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
             YqlAppSettingsState settings = YqlAppSettingsState.getInstance();
             VespaClusterConfig selectedConfig = settings.clusterConfigs.get(selectedRow);
             settings.currentConnection = selectedConfig.name;
+            refresh();
+          }
+          if (selectedColumn == APP_NAME_COLUMN) {
+            String appName = clusterTableModel.getValueAt(selectedRow,
+                    VespaClusterStatusTableModel.APP_NAME_COLUMN)
+                .toString();
+            ClusterStatus.openInBrowser(project, appName);
             refresh();
           }
         }
@@ -141,6 +151,12 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
               label.setToolTipText("" + txt);
               break;
             }
+            case APP_NAME_COLUMN: {
+              label.setText("" + value);
+              label.setIcon(Ide.External_link_arrow);
+              label.setToolTipText("Open ClusterController status page in browser");
+              break;
+            }
             default: {
               label.setText("" + value);
               label.setIcon(null);
@@ -180,7 +196,7 @@ public class YqlDockPanel extends JBPanel implements YqlAppSettingsStateListener
             .disableDownAction()
             .disableUpAction();
 
-    this.configAction = new AnAction("Config", "Open configuration", General.Settings ) {
+    this.configAction = new AnAction("Config", "Open configuration", General.Settings) {
       @Override
       public void actionPerformed(@NotNull AnActionEvent e) {
         if (e == null) {
