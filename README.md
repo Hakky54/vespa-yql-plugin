@@ -66,6 +66,11 @@ file [from disk](https://www.jetbrains.com/help/idea/managing-plugins.html#insta
 
 ## Change-Notes
 
+  * [1.0.5] - Minor changes
+    * Added link in panel to cluster controller.
+    * Added config value for cluster controller endpoint.
+    * Removed zipkin browser panel and changed it to a upload and open browser button.
+  * [1.0.4] - Build script update to support 2024+ version of intellij
   * [1.0.3] - Support for Vespa Java Apps
     * Package, prepare and activate will call maven before packaging and uploading the application.
     * The Vespa tool windows (except for the Side panel) will be hidden from start until they are needed.
