@@ -7,7 +7,7 @@
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
   <name>Vespa-yql</name>
 
-  <version>1.0.5</version>
+  <version>1.0.6</version>
 
   <!-- Should work since 2023.1+ -->
   <!-- 2023.1.6: 231.9414.13 -->
@@ -45,6 +45,12 @@
   <change-notes><![CDATA[
 
 <ul class="incremental">
+  <li>[1.0.6] - Intellij Marketplace fixes
+      <ul class="incremental">
+        <li>Script to generate change notes.</li>
+        <li>Fixed version compability values for marketplace.</li>
+      </ul>
+  </li>
   <li>[1.0.5] - Minor changes
       <ul class="incremental">
         <li>Added link in panel to cluster controller.</li>

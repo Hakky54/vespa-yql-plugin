@@ -64,30 +64,7 @@ total 292
 Install the `vespa-yql-plugin-1.0.0.zip` plugin 
 file [from disk](https://www.jetbrains.com/help/idea/managing-plugins.html#install_plugin_from_disk)
 
-## Change-Notes
-
-  * [1.0.5] - Minor changes
-    * Added link in panel to cluster controller.
-    * Added config value for cluster controller endpoint.
-    * Removed zipkin browser panel and changed it to a upload and open browser button.
-  * [1.0.4] - Build script update to support 2024+ version of intellij
-  * [1.0.3] - Support for Vespa Java Apps
-    * Package, prepare and activate will call maven before packaging and uploading the application.
-    * The Vespa tool windows (except for the Side panel) will be hidden from start until they are needed.
-    * New tool window for Vespa Cluster logs
-      * Works with log files/dirs mapped from docker containers (`vespa.log` or `logarchive` directory).
-  * [1.0.2] - TLS and simple upload
-    * TLS support for connections (not tested on vespa-cloud as I do not have a vespa-cloud)
-    * Right click on application dir and select "Package, Prepare and Activate"
-      * Onlys zips the dir and calls the prepare and activate function on the config endpoint
-      * No support for application code for now.
-    * Simple visualization of service.xml files
-      * Right-click on a services.xml file and select "Show Service Overview"
-    * Show connection status in the Vespa dock
-    * Bugfix for Vespa Results toolWindow
-      * Responses will now turn up on first execution
-  * [1.0.1] - Fix since-build for idea-version
-  * [1.0.0] - First version
+## [Change-Notes](change-notes.md)
 
 ## TODOs (Limitations)
 

@@ -4,16 +4,17 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 plugins {
-    id("org.jetbrains.intellij.platform") version "2.2.1"
+    id("java")
+    id("org.jetbrains.kotlin.jvm") version "2.1.0"
+    id("org.jetbrains.intellij.platform") version "2.5.0"
 }
-
 repositories {
     mavenCentral()
-
     intellijPlatform {
         defaultRepositories()
     }
 }
+
 
 dependencies {
     intellijPlatform {
@@ -55,6 +56,14 @@ sourceSets {
     }
 }
 
+intellijPlatform {
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = "241"
+            untilBuild.set(provider { null })
+        }
+    }
+}
 
 tasks.register("gen.props") {
     doFirst {
