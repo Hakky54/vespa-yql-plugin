@@ -34,8 +34,8 @@ dependencies {
     implementation("com.yahoo.vespa:vespa-feed-client:8.324.16")
 
     // For apache http client SSL connectivity
-    implementation("io.github.hakky54:sslcontext-kickstart:8.3.4")
-    implementation("io.github.hakky54:sslcontext-kickstart-for-pem:8.3.4")
+    implementation("io.github.hakky54:ayza:10.0.0")
+    implementation("io.github.hakky54:ayza-for-pem:10.0.0")
 
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.17.0")
 
